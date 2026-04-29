@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sopas de Letras | EducaTec</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .wordsearch-grid { display:inline-grid; gap:3px; }
+    .ws-cell { width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.95rem;border-radius:6px;background:#f0f4ff;cursor:pointer;user-select:none;text-transform:uppercase;transition:background 0.15s; }
+    .ws-cell.found { background:var(--secondary);color:white; }
+    .ws-cell.highlight { background:var(--accent);color:var(--dark); }
+    .word-chips { display:flex;flex-wrap:wrap;gap:8px;margin-top:12px; }
+    .word-chip { background:#e9f0ff;color:var(--primary);padding:5px 14px;border-radius:50px;font-weight:600;font-size:0.85rem;text-transform:uppercase; }
+    .word-chip.found { background:var(--secondary);color:white;text-decoration:line-through; }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="EducatecLog.jpg" alt="EducaTec" style="height:44px;width:auto;object-fit:contain;border-radius:8px;flex-shrink:0;">
+      <div><div class="logo-text">EducaTec</div><div class="logo-sub" id="sidebar-sub">Panel</div></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebar-user-avatar">U</div>
+        <div><div class="user-name" id="sidebar-user-name">Usuario</div><div class="user-role" id="sidebar-user-role">Usuario</div></div>
+      </div>
+      <button onclick="cerrarSesion()" class="btn btn-danger btn-sm btn-block" style="margin-top:12px;">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">🔠 Sopas de Letras</div>
+      <div class="topbar-actions">
+        <div class="uso-counter" style="margin:0;padding:8px 16px;">
+          <span class="label">Usos:</span>
+          <span class="nums"><span id="sopas-usadas">—</span> / 30</span>
+        </div>
+      </div>
+    </div>
+    <div class="page-content">
+      <div style="display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start;">
+
+        <!-- PANEL CONFIG -->
+        <div class="card">
+          <div class="card-title">⚙️ Configurar Sopa</div>
+          <div class="form-group">
+            <label>Título</label>
+            <input type="text" id="ws-titulo" class="form-control" value="Mi Sopa de Letras">
+          </div>
+          <div class="form-group">
+            <label>Tamaño</label>
+            <select id="ws-size" class="form-control">
+              <option value="10">10×10 (Fácil)</option>
+              <option value="15" selected>15×15 (Medio)</option>
+              <option value="20">20×20 (Difícil)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Direcciones</label>
+            <select id="ws-dir" class="form-control">
+              <option value="basic">Horizontal y Vertical</option>
+              <option value="all" selected>Todas (con diagonal)</option>
+              <option value="reverse">Todas + Invertidas</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Palabras</label>
+            <div id="words-container"></div>
+            <button onclick="addWord()" class="btn btn-outline btn-sm btn-block" style="margin-top:8px;">+ Agregar palabra</button>
+          </div>
+          <button onclick="generarSopa()" class="btn btn-primary btn-block" style="margin-top:4px;">🎲 Generar Sopa</button>
+          <button onclick="loadEjemplo()" class="btn btn-outline btn-block" style="margin-top:8px;">📋 Cargar ejemplo</button>
+        </div>
+
+        <!-- PANEL RESULTADO -->
+        <div class="card">
+          <div id="ws-placeholder" style="text-align:center;padding:60px 20px;color:var(--gray);">
+            <div style="font-size:4rem;opacity:0.3;">🔠</div>
+            <p style="margin-top:12px;">Configura tus palabras y genera la sopa</p>
+          </div>
+          <div id="ws-result" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+              <h3 id="ws-result-title" style="font-size:1.2rem;"></h3>
+              <span id="ws-badge" class="badge"></span>
+            </div>
+            <div style="overflow-x:auto;">
+              <div class="wordsearch-grid" id="ws-grid"></div>
+            </div>
+            <div class="word-chips" id="ws-chips"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;">
+              <button onclick="checkSopa()" class="btn btn-primary btn-sm">✅ Verificar</button>
+              <button onclick="toggleSolucion()" class="btn btn-secondary btn-sm">💡 Solución</button>
+              <button onclick="window.print()" class="btn btn-gray btn-sm">🖨️ Imprimir</button>
+              <button onclick="generarSopa()" class="btn btn-gray btn-sm">🔄 Nueva</button>
+            </div>
+            <div id="ws-autosave-status" style="margin-top:10px;font-size:0.82rem;color:var(--gray);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div class="card" style="margin-top:24px;">
+        <div class="card-title">📋 Historial de Sopas</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Título</th><th>Palabras</th><th>Tamaño</th><th>Fecha</th><th>Acciones</th></tr></thead>
+            <tbody id="tbody-sopas"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--gray);">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+<script>
+let wsState = { grid:[], size:15, placedWords:[], foundWords:new Set(), selecting:false, startCell:null, selectedCells:[], showSol:false };
+let currentGridData = null;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!Auth.isLogged()) { window.location.href = "index.html"; return; }
+  renderSidebarUser(); renderSidebar();
+  addWord(); addWord(); addWord();
+  await cargarContador(); await cargarHistorial();
+});
+
+function renderSidebar() {
+  const rol = Auth.getRol();
+  document.getElementById("sidebar-sub").textContent = rol === "maestro" ? "Panel Maestro" : "Panel Usuario";
+  const nav = document.getElementById("sidebar-nav");
+  if (rol === "maestro") {
+    nav.innerHTML = `<div class="nav-section">Principal</div><a href="dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a><a href="usuarios.html" class="nav-item"><span class="icon">👥</span> Mis Usuarios</a><div class="nav-section">Herramientas</div><a href="sopas.html" class="nav-item active"><span class="icon">🔠</span> Sopas de Letras</a><a href="crucigramas.html" class="nav-item"><span class="icon">🧩</span> Crucigramas</a><a href="ahorcado.html" class="nav-item"><span class="icon">🪢</span> Ahorcado</a>`;
+  } else {
+    nav.innerHTML = `<div class="nav-section">Mis Actividades</div><a href="sopas.html" class="nav-item active"><span class="icon">🔠</span> Sopas de Letras</a><a href="crucigramas.html" class="nav-item"><span class="icon">🧩</span> Crucigramas</a><a href="ahorcado.html" class="nav-item"><span class="icon">🪢</span> Ahorcado</a>`;
+  }
+}
+
+async function cargarContador() {
+  if (Auth.getRol() !== "usuario") { document.getElementById("sopas-usadas").textContent = "—"; return; }
+  const data = await apiFetch("/auth/perfil");
+  if (data?.exito) document.getElementById("sopas-usadas").textContent = data.datos.sopas_usadas;
+}
+
+async function cargarHistorial() {
+  if (Auth.getRol() !== "usuario") { document.getElementById("tbody-sopas").innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:20px;">Solo disponible para usuarios</td></tr>`; return; }
+  const data = await apiFetch("/sopas");
+  const tbody = document.getElementById("tbody-sopas");
+  if (!data?.exito) return;
+  const sopas = data.datos;
+  if (!sopas.length) { tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">🔠</div><p>No has generado sopas aún</p></div></td></tr>`; return; }
+  tbody.innerHTML = sopas.map((s, i) => `<tr><td>${i+1}</td><td><strong>${s.titulo}</strong></td><td>${s.palabras.length} palabras</td><td>${s.tamano}×${s.tamano}</td><td>${formatFecha(s.creado_en)}</td><td><button class="btn btn-primary btn-sm" onclick="verSopa(${s.id})" style="margin-right:6px;">👁️ Ver</button><button class="btn btn-secondary btn-sm" onclick="editarSopa(${s.id})" style="margin-right:6px;">✏️ Editar</button><button class="btn btn-outline btn-sm" onclick="exportarIframeSopa(${s.id},'${s.titulo.replace(/'/g,"\\'")}',${s.tamano})" style="margin-right:6px;">🔗 Exportar</button><button class="btn btn-danger btn-sm" onclick="eliminarSopa(${s.id})">🗑️</button></td></tr>`).join("");
+}
+
+// ── VER Y EDITAR ──────────────────────────────────────────────────────────────
+async function verSopa(id) {
+  const data = await apiFetch(`/sopas/${id}`);
+  if (!data?.exito) { toast("Error al cargar","error"); return; }
+  const s = data.datos;
+  if (!s.grid_data) { toast("Esta sopa no tiene datos de cuadrícula","error"); return; }
+  wsState = { grid: s.grid_data.grid, size: s.tamano, placedWords: s.grid_data.placed, foundWords: new Set(), selecting: false, startCell: null, selectedCells: [], showSol: false };
+  currentGridData = s.grid_data;
+  renderSopa(s.titulo, s.palabras, s.grid_data.placed);
+  toast("Sopa cargada ✓","success");
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function editarSopa(id) {
+  const data = await apiFetch(`/sopas/${id}`);
+  if (!data?.exito) { toast("Error al cargar","error"); return; }
+  const s = data.datos;
+  document.getElementById("ws-titulo").value = s.titulo;
+  document.getElementById("ws-size").value = s.tamano;
+  document.getElementById("words-container").innerHTML = "";
+  s.palabras.forEach(p => addWord(p));
+  
+  if (s.grid_data) {
+    wsState = { grid: s.grid_data.grid, size: s.tamano, placedWords: s.grid_data.placed, foundWords: new Set(), selecting: false, startCell: null, selectedCells: [], showSol: false };
+    currentGridData = s.grid_data;
+    renderSopa(s.titulo, s.palabras, s.grid_data.placed);
+  }
+  
+  toast("Listo para editar ✏️","success");
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── PALABRAS ──────────────────────────────────────────────────────────────────
+function addWord(word = "") {
+  const c = document.getElementById("words-container");
+  const row = document.createElement("div");
+  row.style.cssText = "display:flex;gap:8px;margin-bottom:8px;";
+  row.innerHTML = `<input type="text" class="form-control" placeholder="Nueva palabra" maxlength="20" value="${word}"><button class="btn-remove" onclick="this.closest('div').remove()" style="background:#ff4d4d;color:white;border:none;border-radius:8px;padding:0 12px;cursor:pointer;font-size:1rem;">✕</button>`;
+  c.appendChild(row);
+  if (!word) row.querySelector("input").focus();
+}
+
+function getWords() {
+  return [...new Set([...document.querySelectorAll("#words-container input")].map(i => i.value.trim().toUpperCase().replace(/\s+/g,"")).filter(w => w.length >= 2))];
+}
+
+function loadEjemplo() {
+  const ws = ["PERRO","GATO","LEON","TIGRE","ELEFANTE","JIRAFA","COCODRILO","SERPIENTE"];
+  document.getElementById("words-container").innerHTML = "";
+  ws.forEach(w => addWord(w));
+  document.getElementById("ws-titulo").value = "Animales del mundo";
+  toast("Ejemplo cargado","success");
+}
+
+// ── GENERAR ───────────────────────────────────────────────────────────────────
+async function generarSopa() {
+  const words = getWords();
+  if (!words.length) { toast("Agrega al menos una palabra","error"); return; }
+  const size = parseInt(document.getElementById("ws-size").value);
+  const dir = document.getElementById("ws-dir").value;
+  const titulo = document.getElementById("ws-titulo").value.trim() || "Sopa de Letras";
+  const valid = words.filter(w => w.length <= size);
+  if (!valid.length) { toast("Palabras demasiado largas para el tamaño elegido","error"); return; }
+  let result = null;
+  for (let i=0;i<5;i++) { result = buildGrid(valid,size,dir); if(result) break; }
+  if (!result) { toast("No se pudo generar. Intenta con un tamaño mayor.","error"); return; }
+  wsState = { grid:result.grid, size, placedWords:result.placed, foundWords:new Set(), selecting:false, startCell:null, selectedCells:[], showSol:false };
+  currentGridData = result;
+  renderSopa(titulo, valid, result.placed);
+  toast("¡Sopa generada! 🎉","success");
+  // Autoguardado
+  await autoGuardarSopa(titulo, valid, size, dir, result);
+}
+
+function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function buildGrid(words,size,dirMode) {
+  const grid = Array.from({length:size},()=>Array(size).fill(""));
+  const dirs = { basic:[[0,1],[1,0]], all:[[0,1],[1,0],[1,1],[1,-1],[-1,0],[0,-1],[-1,-1],[-1,1]], reverse:[[0,1],[1,0],[1,1],[1,-1],[-1,0],[0,-1],[-1,-1],[-1,1],[0,-1],[-1,0]] };
+  const directions = dirs[dirMode]||dirs.all;
+  const placed = [];
+  for (const word of [...words].sort((a,b)=>b.length-a.length)) {
+    let ok=false; const sd=shuffle([...directions]);
+    for(let t=0;t<200&&!ok;t++){
+      const [dr,dc]=sd[t%sd.length], r=Math.floor(Math.random()*size), c=Math.floor(Math.random()*size);
+      if(canPlace(grid,word,r,c,dr,dc,size)){placed.push({word,cells:placeWord(grid,word,r,c,dr,dc)});ok=true;}
+    }
+  }
+  const L="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(!grid[r][c]) grid[r][c]=L[Math.floor(Math.random()*26)];
+  return {grid,placed};
+}
+
+function canPlace(g,w,r,c,dr,dc,s){for(let i=0;i<w.length;i++){const nr=r+dr*i,nc=c+dc*i;if(nr<0||nr>=s||nc<0||nc>=s)return false;if(g[nr][nc]&&g[nr][nc]!==w[i])return false;}return true;}
+function placeWord(g,w,r,c,dr,dc){const cells=[];for(let i=0;i<w.length;i++){const nr=r+dr*i,nc=c+dc*i;g[nr][nc]=w[i];cells.push({r:nr,c:nc});}return cells;}
+
+function renderSopa(titulo,words,placed) {
+  document.getElementById("ws-placeholder").style.display="none";
+  const res=document.getElementById("ws-result"); res.style.display="block";
+  document.getElementById("ws-result-title").textContent=titulo;
+  const size=wsState.size, badge=document.getElementById("ws-badge");
+  if(size<=10){badge.textContent="Fácil";badge.className="badge badge-success";}
+  else if(size<=15){badge.textContent="Medio";badge.className="badge badge-warning";}
+  else{badge.textContent="Difícil";badge.className="badge badge-danger";}
+  const gridEl=document.getElementById("ws-grid");
+  gridEl.style.gridTemplateColumns=`repeat(${size},34px)`; gridEl.innerHTML="";
+  for(let r=0;r<size;r++) for(let c=0;c<size;c++){
+    const cell=document.createElement("div"); cell.className="ws-cell"; cell.textContent=wsState.grid[r][c]; cell.dataset.r=r; cell.dataset.c=c;
+    cell.addEventListener("mousedown",onMD); cell.addEventListener("mouseenter",onME); cell.addEventListener("mouseup",onMU);
+    cell.addEventListener("touchstart",onTS,{passive:true}); cell.addEventListener("touchmove",onTM,{passive:true}); cell.addEventListener("touchend",onTE);
+    gridEl.appendChild(cell);
+  }
+  const chips=document.getElementById("ws-chips"); chips.innerHTML="";
+  words.forEach(w=>{const c=document.createElement("span");c.className="word-chip";c.textContent=w;c.dataset.word=w;chips.appendChild(c);});
+}
+
+// ── SELECCIÓN ─────────────────────────────────────────────────────────────────
+const getCE=(r,c)=>document.querySelector(`.ws-cell[data-r="${r}"][data-c="${c}"]`);
+function onMD(){wsState.selecting=true;wsState.startCell={r:+this.dataset.r,c:+this.dataset.c};wsState.selectedCells=[wsState.startCell];hlSel();}
+function onME(){if(!wsState.selecting)return;wsState.selectedCells=getLine(wsState.startCell,{r:+this.dataset.r,c:+this.dataset.c});hlSel();}
+function onMU(){if(!wsState.selecting)return;wsState.selecting=false;checkSel();}
+function onTS(e){const el=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY);if(el?.classList.contains("ws-cell")){wsState.selecting=true;wsState.startCell={r:+el.dataset.r,c:+el.dataset.c};wsState.selectedCells=[wsState.startCell];hlSel();}}
+function onTM(e){if(!wsState.selecting)return;const el=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY);if(el?.classList.contains("ws-cell")){wsState.selectedCells=getLine(wsState.startCell,{r:+el.dataset.r,c:+el.dataset.c});hlSel();}}
+function onTE(){if(!wsState.selecting)return;wsState.selecting=false;checkSel();}
+document.addEventListener("mouseup",()=>{if(wsState.selecting){wsState.selecting=false;checkSel();}});
+
+function getLine(s,e){const dr=e.r-s.r,dc=e.c-s.c,len=Math.max(Math.abs(dr),Math.abs(dc));if(!len)return[s];if(Math.abs(dr)&&Math.abs(dc)&&Math.abs(dr)!==Math.abs(dc))return[s];const sr=dr?dr/Math.abs(dr):0,sc=dc?dc/Math.abs(dc):0;const cells=[];for(let i=0;i<=len;i++)cells.push({r:s.r+sr*i,c:s.c+sc*i});return cells;}
+function hlSel(){document.querySelectorAll(".ws-cell.highlight").forEach(e=>e.classList.remove("highlight"));wsState.selectedCells.forEach(({r,c})=>{const e=getCE(r,c);if(e&&!e.classList.contains("found"))e.classList.add("highlight");});}
+
+function checkSel(){
+  document.querySelectorAll(".ws-cell.highlight").forEach(e=>e.classList.remove("highlight"));
+  const sel=wsState.selectedCells; if(sel.length<2)return;
+  for(const{word,cells}of wsState.placedWords){
+    if(wsState.foundWords.has(word))continue;
+    if(cellsMatch(sel,cells)||cellsMatch(sel,[...cells].reverse())){
+      wsState.foundWords.add(word);
+      cells.forEach(({r,c})=>{const e=getCE(r,c);if(e){e.classList.remove("highlight");e.classList.add("found");}});
+      const chip=document.querySelector(`.word-chip[data-word="${word}"]`);if(chip)chip.classList.add("found");
+      toast(`¡Encontraste: ${word}! 🎉`,"success");
+      if(wsState.foundWords.size===wsState.placedWords.length)setTimeout(()=>toast("🏆 ¡Completaste la sopa!","success"),500);
+      return;
+    }
+  }
+}
+
+function cellsMatch(a,b){return a.length===b.length&&a.every((c,i)=>c.r===b[i].r&&c.c===b[i].c);}
+function checkSopa(){const t=wsState.placedWords.length,f=wsState.foundWords.size;toast(`Encontradas: ${f}/${t}`,f===t?"success":"");}
+
+function toggleSolucion(){
+  wsState.showSol=!wsState.showSol;
+  wsState.placedWords.forEach(({word,cells})=>cells.forEach(({r,c})=>{const e=getCE(r,c);if(e){wsState.showSol?e.classList.add("found"):(!wsState.foundWords.has(word)&&e.classList.remove("found"));}}));
+  toast(wsState.showSol?"💡 Solución mostrada":"Solución ocultada");
+}
+
+// ── AUTOGUARDADO ──────────────────────────────────────────────────────────────
+async function autoGuardarSopa(titulo, palabras, tamano, direcciones, gridData) {
+  if (Auth.getRol() !== "usuario") return;
+  const status = document.getElementById("ws-autosave-status");
+  if (status) status.textContent = "💾 Guardando automáticamente...";
+  const data = await apiFetch("/sopas", {
+    method: "POST",
+    body: JSON.stringify({ titulo, palabras, tamano, direcciones, grid_data: gridData }),
+  });
+  if (!data?.exito) {
+    if (status) status.textContent = "⚠️ " + (data?.mensaje || "No se pudo autoguardar");
+    return;
+  }
+  if (status) status.textContent = `✅ Guardada automáticamente (ID: ${data.datos.id})`;
+  await cargarContador(); await cargarHistorial();
+}
+
+async function eliminarSopa(id) {
+  if (!confirm("¿Eliminar esta sopa?")) return;
+  const data = await apiFetch(`/sopas/${id}`,{method:"DELETE"});
+  if (!data?.exito) { toast("Error al eliminar","error"); return; }
+  toast("Sopa eliminada","success"); await cargarHistorial(); await cargarContador();
+}
+
+// ── EXPORTAR IFRAME ───────────────────────────────────────────────────────────
+function exportarIframeSopa(id, titulo, tamano) {
+  const baseUrl = window.location.origin + window.location.pathname.replace("sopas.html","");
+  const iframeUrl = `${baseUrl}visor_sopa.html?id=${id}`;
+  const alto = tamano <= 10 ? 480 : tamano <= 15 ? 620 : 780;
+  const codigo = `<iframe allow="fullscreen; autoplay; allow-top-navigation-by-user-activation" allowfullscreen width="795" height="${alto}" frameborder="0" src="${iframeUrl}" title="${titulo}"></iframe>`;
+  mostrarModalIframe(titulo, codigo);
+}
+
+function mostrarModalIframe(titulo, codigo) {
+  let modal = document.getElementById("modal-iframe");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "modal-iframe";
+    modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;";
+    modal.innerHTML = `
+      <div style="background:white;border-radius:16px;padding:32px;max-width:640px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+        <h3 id="modal-iframe-titulo" style="margin-bottom:16px;font-size:1.1rem;">🔗 Código de inserción</h3>
+        <p style="font-size:0.88rem;color:#666;margin-bottom:12px;">Copia este código y pégalo en tu plataforma educativa (Moodle, Google Sites, etc.):</p>
+        <textarea id="modal-iframe-code" readonly style="width:100%;height:110px;font-family:monospace;font-size:0.8rem;border:1px solid #ddd;border-radius:8px;padding:10px;resize:none;background:#f8f9ff;"></textarea>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+          <button onclick="copiarCodigoIframe()" class="btn btn-primary btn-sm">📋 Copiar código</button>
+          <button onclick="document.getElementById('modal-iframe').remove()" class="btn btn-outline btn-sm">Cerrar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener("click", e => { if (e.target === modal) modal.remove(); });
+  }
+  document.getElementById("modal-iframe-titulo").textContent = `🔗 Exportar: ${titulo}`;
+  document.getElementById("modal-iframe-code").value = codigo;
+}
+
+function copiarCodigoIframe() {
+  const ta = document.getElementById("modal-iframe-code");
+  ta.select(); ta.setSelectionRange(0, 99999);
+  navigator.clipboard?.writeText(ta.value).then(() => toast("¡Código copiado! 📋","success")).catch(() => { document.execCommand("copy"); toast("¡Código copiado! 📋","success"); });
+}
+</script>
+</body>
+</html>

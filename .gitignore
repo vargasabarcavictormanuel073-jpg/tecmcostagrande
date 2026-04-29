@@ -1,0 +1,32 @@
+# ─────────────────────────────────────────────
+# .gitignore — EducaTec
+# Archivos que NO deben subirse a GitHub
+# ─────────────────────────────────────────────
+
+# Dependencias de Node.js (se instalan con npm install)
+node_modules/
+Backend/node_modules/
+
+# Base de datos SQLite (se crea automáticamente al iniciar)
+# ⚠️ IMPORTANTE: No subir el .db para no exponer datos reales
+Backend/base_de_datos/edupuzzle.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Variables de entorno (contienen secretos)
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+*.swp

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EducaTec | Sopas de Letras y Crucigramas</title>
+  <style>
+    :root {
+      --primary: #0066cc;
+      --primary-dark: #004499;
+      --secondary: #00a86b;
+      --accent: #ffcc00;
+      --gray: #6c757d;
+      --dark: #212529;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background: linear-gradient(135deg, #f0f4f8, #e6edf7);
+      min-height: 100vh;
+    }
+    .top-bar { background: var(--primary); color: white; padding: 8px 0; font-size: 0.85rem; text-align: center; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    header { background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
+    .logo-container { display: flex; align-items: center; gap: 15px; }
+    .tecnm-logo, .educatec-logo { height: 65px; width: auto; }
+    .nav-links { display: flex; gap: 30px; align-items: center; }
+    .nav-links a { text-decoration: none; color: var(--dark); font-weight: 600; transition: color 0.3s; }
+    .nav-links a:hover { color: var(--primary); }
+    .btn {
+      padding: 12px 28px; border: none; border-radius: 50px; font-weight: 600;
+      cursor: pointer; transition: all 0.3s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px; font-size: 1rem;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,102,204,0.3); }
+    .btn-secondary { background: var(--secondary); color: white; }
+    .btn-secondary:hover { background: #008f5a; transform: translateY(-3px); }
+    .btn-white { background: white; color: var(--primary); font-size: 1.2rem; padding: 16px 40px; }
+    .btn-white:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+    .btn:focus, a:focus { outline: 3px solid var(--accent); outline-offset: 4px; }
+
+    /* HERO */
+    .hero { padding: 100px 0 80px; text-align: center; position: relative; overflow: hidden; }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at center, rgba(0,102,204,0.08), transparent 70%); z-index: 0;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+    .hero h1 {
+      font-size: 3.2rem; margin-bottom: 20px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.1;
+    }
+    .hero p { font-size: 1.35rem; color: var(--gray); max-width: 650px; margin: 0 auto 40px; }
+    .hero-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+
+    /* FEATURES */
+    .features { padding: 80px 0; background: white; }
+    .section-title { text-align: center; font-size: 2.2rem; margin-bottom: 60px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+    .card {
+      background: white; border-radius: 20px; padding: 40px 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center;
+      transition: transform 0.4s, box-shadow 0.4s;
+    }
+    .card:hover { transform: translateY(-15px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+    .card-icon {
+      width: 90px; height: 90px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 25px; font-size: 2.8rem; color: white;
+    }
+    .card h3 { font-size: 1.6rem; margin-bottom: 15px; }
+    .card p { color: var(--gray); margin-bottom: 25px; }
+
+    /* HOW IT WORKS */
+    .how-it-works { padding: 80px 0; background: linear-gradient(135deg, #f8f9fa, #e9f0ff); }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1100px; margin: 0 auto; }
+    .step { text-align: center; padding: 30px; }
+    .step-number {
+      width: 60px; height: 60px; background: var(--accent); color: var(--dark);
+      font-weight: bold; font-size: 1.8rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
+    }
+
+    /* CTA */
+    .cta-section { padding: 80px 0; background: var(--primary); color: white; text-align: center; }
+    .cta-section h2 { font-size: 2.5rem; margin-bottom: 20px; }
+    .cta-section p { font-size: 1.3rem; max-width: 700px; margin: 0 auto 40px; }
+
+    /* FOOTER */
+    footer { background: var(--dark); color: white; padding: 60px 0 30px; }
+    .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; }
+    .footer-col h3 { color: var(--accent); margin-bottom: 20px; font-size: 1.3rem; }
+    .footer-col a { color: #ccc; text-decoration: none; display: block; margin-bottom: 10px; }
+    .footer-col a:hover { color: white; }
+    .footer-bottom { text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid #444; color: #aaa; font-size: 0.9rem; }
+
+    /* ANIMATIONS */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.2rem; }
+      .nav-links { display: none; }
+      .tecnm-logo, .educatec-logo { height: 50px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">Tecnológico Nacional de México • Educatec</div>
+
+  <header>
+    <div class="container">
+      <nav>
+        <div class="logo-container">
+          <img src="../EducatecLog.jpg" alt="EducaTec" class="educatec-logo">
+        </div>
+        <div class="nav-links">
+          <a href="index.html">Inicio</a>
+          <a href="../sopas.html">Sopas de Letras</a>
+          <a href="../crucigramas.html">Crucigramas</a>
+          <a href="#acerca">Acerca de</a>
+        </div>
+        <a href="../index.html" class="btn btn-primary">Iniciar Sesión</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>¡Aprende jugando con EducaTec!</h1>
+        <p>Crea sopas de letras y crucigramas educativos de forma rápida y divertida. Ideal para maestros, estudiantes y familias.</p>
+        <div class="hero-buttons">
+          <a href="../sopas.html" class="btn btn-primary"><span>🍲</span> Generar Sopa de Letras</a>
+          <a href="../crucigramas.html" class="btn btn-secondary"><span>📝</span> Generar Crucigrama</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">¿Qué puedes crear?</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">🔠</div>
+          <h3>Sopa de Letras</h3>
+          <p>Genera sopas de letras personalizadas con las palabras que tú elijas. Perfectas para reforzar vocabulario y ortografía.</p>
+          <a href="../sopas.html" class="btn btn-primary" style="width:100%;justify-content:center;">Crear Sopa de Letras</a>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧩</div>
+          <h3>Crucigramas</h3>
+          <p>Diseña crucigramas educativos con definiciones y pistas. Ideal para repasar temas específicos de cualquier materia.</p>
+          <a href="../crucigramas.html" class="btn btn-secondary" style="width:100%;justify-content:center;">Crear Crucigrama</a>
+        </div>
+        <div class="card">
+          <div class="card-icon">🎯</div>
+          <h3>Para todos</h3>
+          <p>Diseñado para estudiantes de primaria, secundaria y bachillerato. Fomenta el aprendizaje activo y la diversión.</p>
+          <a href="#" class="btn" style="width:100%;justify-content:center;background:#6c757d;color:white;">Ver Ejemplos</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title">¿Cómo funciona?</h2>
+      <div class="steps">
+        <div class="step"><div class="step-number">1</div><h3>Elige el tipo</h3><p>Selecciona si quieres crear una sopa de letras o un crucigrama.</p></div>
+        <div class="step"><div class="step-number">2</div><h3>Ingresa el contenido</h3><p>Agrega tus palabras y definiciones o pistas.</p></div>
+        <div class="step"><div class="step-number">3</div><h3>Personaliza</h3><p>Ajusta el tamaño, dificultad y diseño.</p></div>
+        <div class="step"><div class="step-number">4</div><h3>¡Descarga e imprime!</h3><p>Exporta en PDF listo para usar en clase o en casa.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container">
+      <h2>¿Listo para comenzar?</h2>
+      <p>Crea actividades educativas interactivas en minutos</p>
+      <a href="../sopas.html" class="btn btn-white">Empezar ahora</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-col">
+          <h3>EducaTec</h3>
+          <p>Plataforma educativa del Tecnológico Nacional de México para la generación de juegos de palabras.</p>
+        </div>
+        <div class="footer-col">
+          <h3>Enlaces Rápidos</h3>
+          <a href="../sopas.html">Sopas de Letras</a>
+          <a href="../crucigramas.html">Crucigramas</a>
+          <a href="#">Ejemplos</a>
+          <a href="#">Tutoriales</a>
+        </div>
+        <div class="footer-col">
+          <h3>Recursos</h3>
+          <a href="#">Para Maestros</a>
+          <a href="#">Para Estudiantes</a>
+          <a href="#">Blog Educativo</a>
+        </div>
+        <div class="footer-col">
+          <h3>Contacto</h3>
+          <p>Tecnológico Nacional de México</p>
+          <p>Dirección General de Educación Superior Tecnológica</p>
+          <p>contacto@educatec.mx</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Educatec - Tecnológico Nacional de México. Todos los derechos reservados.</p>
+        <p style="margin-top:10px;">Hecho con ❤️ para la educación en México</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        if (href !== '#' && href.length > 1) {
+          e.preventDefault();
+          const t = document.querySelector(href);
+          if (t) t.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+    // Scroll animation
+    const animEls = document.querySelectorAll('.card, .step');
+    animEls.forEach(el => { el.style.opacity = '0'; el.style.transform = 'translateY(30px)'; el.style.transition = 'opacity 0.6s ease, transform 0.6s ease'; });
+    function onScroll() {
+      animEls.forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 80) {
+          el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+        }
+      });
+    }
+    window.addEventListener('scroll', onScroll);
+    window.addEventListener('load', onScroll);
+  </script>
+</body>
+</html>

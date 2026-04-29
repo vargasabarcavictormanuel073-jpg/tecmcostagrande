@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | EducaTec</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="EducatecLog.jpg" alt="EducaTec" style="height:44px;width:auto;object-fit:contain;border-radius:8px;flex-shrink:0;">
+      <div><div class="logo-text">EducaTec</div><div class="logo-sub">Panel Maestro</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Principal</div>
+      <a href="dashboard.html" class="nav-item active"><span class="icon">📊</span> Dashboard</a>
+      <a href="usuarios.html"  class="nav-item"><span class="icon">👥</span> Mis Usuarios</a>
+      <a href="actividades.html" class="nav-item"><span class="icon">📋</span> Actividades</a>
+      <div class="nav-section">Herramientas</div>
+      <a href="sopas.html" class="nav-item"><span class="icon">🔠</span> Sopas de Letras</a>
+      <a href="crucigramas.html" class="nav-item"><span class="icon">🧩</span> Crucigramas</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebar-user-avatar">M</div>
+        <div><div class="user-name" id="sidebar-user-name">Maestro</div><div class="user-role" id="sidebar-user-role">Maestro</div></div>
+      </div>
+      <button onclick="cerrarSesion()" class="btn btn-danger btn-sm btn-block" style="margin-top:12px;">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">📊 Dashboard</div>
+      <div class="topbar-actions">
+        <a href="usuarios.html" class="btn btn-primary btn-sm">+ Nuevo Usuario</a>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <!-- STAT CARDS -->
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="stat-icon blue">👥</div>
+          <div class="stat-info">
+            <div class="value" id="stat-usuarios">—</div>
+            <div class="label">Usuarios creados</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-info">
+            <div class="value" id="stat-restantes">—</div>
+            <div class="label">Espacios restantes</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon yellow">🔠</div>
+          <div class="stat-info">
+            <div class="value" id="stat-sopas">—</div>
+            <div class="label">Sopas generadas</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">🧩</div>
+          <div class="stat-info">
+            <div class="value" id="stat-crucigramas">—</div>
+            <div class="label">Crucigramas generados</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAPACIDAD -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-title">Capacidad de Usuarios</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.88rem;color:var(--gray);">
+          <span id="usuarios-pct">0 / 15 usuarios</span>
+          <span>Límite: 15</span>
+        </div>
+        <div class="progress">
+          <div class="progress-bar green" id="usuarios-bar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- ACCESOS RÁPIDOS -->
+      <div class="card">
+        <div class="card-title">Accesos Rápidos</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <a href="usuarios.html" class="btn btn-primary">👥 Gestionar Usuarios</a>
+          <a href="sopas.html"    class="btn btn-secondary">🔠 Ver Sopas</a>
+          <a href="crucigramas.html" class="btn btn-outline">🧩 Ver Crucigramas</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

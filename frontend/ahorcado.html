@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ahorcado | EducaTec</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .word-row { display:flex;gap:6px;margin-bottom:8px;align-items:center; }
+    .autosave-status { font-size:0.82rem;color:var(--gray);margin-top:10px; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="EducatecLog.jpg" alt="EducaTec" style="height:44px;width:auto;object-fit:contain;border-radius:8px;flex-shrink:0;">
+      <div><div class="logo-text">EducaTec</div><div class="logo-sub" id="sidebar-sub">Panel</div></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebar-user-avatar">U</div>
+        <div>
+          <div class="user-name" id="sidebar-user-name">Usuario</div>
+          <div class="user-role" id="sidebar-user-role">Usuario</div>
+        </div>
+      </div>
+      <button onclick="cerrarSesion()" class="btn btn-danger btn-sm btn-block" style="margin-top:12px;">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">🪢 Ahorcado</div>
+      <div class="topbar-actions">
+        <div class="uso-counter" style="margin:0;padding:8px 16px;">
+          <span class="label">Usos:</span>
+          <span class="nums"><span id="ah-usados">—</span> / 20</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div style="display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start;">
+
+        <!-- CONFIG -->
+        <div class="card">
+          <div class="card-title">⚙️ Configurar Ahorcado</div>
+          <div class="form-group">
+            <label>Título</label>
+            <input type="text" id="ah-titulo" class="form-control" value="Mi Ahorcado">
+          </div>
+          <div class="form-group">
+            <label>Palabras y pistas</label>
+            <div id="ah-words-container"></div>
+            <button onclick="addAhWord()" class="btn btn-outline btn-sm btn-block" style="margin-top:8px;">+ Agregar palabra</button>
+          </div>
+          <button onclick="generarAhorcado()" class="btn btn-primary btn-block" style="margin-top:4px;">🎲 Generar Ahorcado</button>
+          <button onclick="loadAhEjemplo()" class="btn btn-outline btn-block" style="margin-top:8px;">📋 Cargar ejemplo</button>
+        </div>
+
+        <!-- PREVIEW -->
+        <div class="card">
+          <div id="ah-placeholder" style="text-align:center;padding:60px 20px;color:var(--gray);">
+            <div style="font-size:4rem;opacity:0.3;">🪢</div>
+            <p style="margin-top:12px;">Agrega palabras con pistas y genera el ahorcado</p>
+          </div>
+          <div id="ah-result" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+              <h3 id="ah-result-title" style="font-size:1.2rem;"></h3>
+              <span class="badge badge-info" id="ah-badge"></span>
+            </div>
+            <!-- Dibujo ahorcado -->
+            <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;">
+              <div>
+                <svg id="ah-svg" width="160" height="180" viewBox="0 0 160 180" style="display:block;"></svg>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div id="ah-pista" style="font-size:0.9rem;color:var(--gray);margin-bottom:12px;font-style:italic;"></div>
+                <div id="ah-letras" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;justify-content:center;"></div>
+                <div id="ah-teclado" style="display:flex;flex-wrap:wrap;gap:5px;max-width:320px;"></div>
+                <div id="ah-msg" style="margin-top:14px;font-size:1rem;font-weight:700;text-align:center;min-height:24px;"></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;">
+              <button onclick="siguientePalabra()" class="btn btn-primary btn-sm" id="btn-siguiente" style="display:none;">➡️ Siguiente</button>
+              <button onclick="generarAhorcado()" class="btn btn-gray btn-sm">🔄 Reiniciar</button>
+            </div>
+            <div class="autosave-status" id="ah-autosave-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div class="card" style="margin-top:24px;">
+        <div class="card-title">📋 Historial de Ahorcados</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Título</th><th>Palabras</th><th>Fecha</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="tbody-ah">
+              <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--gray);">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+<script>
+// ── ESTADO ────────────────────────────────────────────────────────────────────
+let ahState = {
+  palabras: [],       // [{word, pista}]
+  indice: 0,
+  palabra: "",
+  pista: "",
+  letrasAdivinadas: new Set(),
+  errores: 0,
+  maxErrores: 6,
+  terminado: false,
+};
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!Auth.isLogged()) { window.location.href = "index.html"; return; }
+  renderSidebarUser(); renderSidebar();
+  addAhWord(); addAhWord(); addAhWord();
+  await cargarContador(); await cargarHistorial();
+});
+
+function renderSidebar() {
+  const rol = Auth.getRol();
+  document.getElementById("sidebar-sub").textContent = rol === "maestro" ? "Panel Maestro" : "Panel Usuario";
+  const nav = document.getElementById("sidebar-nav");
+  if (rol === "maestro") {
+    nav.innerHTML = `<div class="nav-section">Principal</div>
+      <a href="dashboard.html" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+      <a href="usuarios.html" class="nav-item"><span class="icon">👥</span> Mis Usuarios</a>
+      <div class="nav-section">Herramientas</div>
+      <a href="sopas.html" class="nav-item"><span class="icon">🔠</span> Sopas de Letras</a>
+      <a href="crucigramas.html" class="nav-item"><span class="icon">🧩</span> Crucigramas</a>
+      <a href="ahorcado.html" class="nav-item active"><span class="icon">🪢</span> Ahorcado</a>`;
+  } else {
+    nav.innerHTML = `<div class="nav-section">Mis Actividades</div>
+      <a href="sopas.html" class="nav-item"><span class="icon">🔠</span> Sopas de Letras</a>
+      <a href="crucigramas.html" class="nav-item"><span class="icon">🧩</span> Crucigramas</a>
+      <a href="ahorcado.html" class="nav-item active"><span class="icon">🪢</span> Ahorcado</a>`;
+  }
+}
+
+async function cargarContador() {
+  if (Auth.getRol() !== "usuario") { document.getElementById("ah-usados").textContent = "—"; return; }
+  const data = await apiFetch("/auth/perfil");
+  if (data?.exito) document.getElementById("ah-usados").textContent = data.datos.ahorcados_usados ?? "—";
+}
+
+async function cargarHistorial() {
+  if (Auth.getRol() !== "usuario") {
+    document.getElementById("tbody-ah").innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:20px;">Solo disponible para usuarios</td></tr>`;
+    return;
+  }
+  const data = await apiFetch("/ahorcado");
+  const tbody = document.getElementById("tbody-ah");
+  if (!data?.exito) return;
+  const items = data.datos;
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">🪢</div><p>No has creado ahorcados aún</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = items.map((a, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${a.titulo}</strong></td>
+      <td>${a.palabras.length} palabras</td>
+      <td>${formatFecha(a.creado_en)}</td>
+      <td>
+        <button class="btn btn-primary btn-sm" onclick="verAhorcado(${a.id})" style="margin-right:6px;">👁️ Ver</button>
+        <button class="btn btn-outline btn-sm" onclick="exportarIframeAh(${a.id},'${a.titulo.replace(/'/g,"\\'")}',${a.palabras.length})" style="margin-right:6px;">🔗 Exportar</button>
+        <button class="btn btn-danger btn-sm" onclick="eliminarAhorcado(${a.id})">🗑️</button>
+      </td>
+    </tr>`).join("");
+}
+
+// ── PALABRAS ──────────────────────────────────────────────────────────────────
+function addAhWord(word = "", pista = "") {
+  const c = document.getElementById("ah-words-container");
+  const row = document.createElement("div");
+  row.className = "word-row";
+  row.innerHTML = `
+    <input type="text" placeholder="Palabra" maxlength="20" value="${word}" class="form-control" style="flex:1;">
+    <input type="text" placeholder="Pista" value="${pista}" class="form-control" style="flex:2;">
+    <button onclick="this.closest('.word-row').remove()" style="background:#ff4d4d;color:white;border:none;border-radius:8px;padding:0 10px;height:42px;cursor:pointer;flex-shrink:0;">✕</button>`;
+  c.appendChild(row);
+}
+
+function getAhWords() {
+  return [...document.querySelectorAll("#ah-words-container .word-row")].map(row => {
+    const ins = row.querySelectorAll("input");
+    const word = ins[0].value.trim().toUpperCase().replace(/\s+/g, "");
+    const pista = ins[1].value.trim();
+    return word.length >= 2 ? { word, pista: pista || "Adivina la palabra" } : null;
+  }).filter(Boolean);
+}
+
+function loadAhEjemplo() {
+  const ex = [
+    { word: "JAVASCRIPT", pista: "Lenguaje de programación web" },
+    { word: "COMPUTADORA", pista: "Máquina electrónica de procesamiento" },
+    { word: "INTERNET", pista: "Red mundial de comunicación" },
+    { word: "ALGORITMO", pista: "Secuencia de pasos para resolver un problema" },
+    { word: "VARIABLE", pista: "Contenedor de datos en programación" },
+  ];
+  document.getElementById("ah-words-container").innerHTML = "";
+  ex.forEach(({ word, pista }) => addAhWord(word, pista));
+  document.getElementById("ah-titulo").value = "Programación Básica";
+  toast("Ejemplo cargado", "success");
+}
+
+// ── GENERAR ───────────────────────────────────────────────────────────────────
+async function generarAhorcado() {
+  const palabras = getAhWords();
+  if (!palabras.length) { toast("Agrega al menos una palabra", "error"); return; }
+  const titulo = document.getElementById("ah-titulo").value.trim() || "Ahorcado";
+
+  ahState = { palabras, indice: 0, terminado: false };
+  iniciarPalabra();
+
+  document.getElementById("ah-placeholder").style.display = "none";
+  document.getElementById("ah-result").style.display = "block";
+  document.getElementById("ah-result-title").textContent = titulo;
+  document.getElementById("ah-badge").textContent = `${palabras.length} palabras`;
+
+  toast("¡Ahorcado generado! 🎉", "success");
+  await autoGuardarAhorcado(titulo, palabras);
+}
+
+function iniciarPalabra() {
+  const { palabras, indice } = ahState;
+  const { word, pista } = palabras[indice];
+  ahState.palabra = word;
+  ahState.pista = pista;
+  ahState.letrasAdivinadas = new Set();
+  ahState.errores = 0;
+  ahState.terminado = false;
+
+  document.getElementById("ah-pista").textContent = `💡 Pista: ${pista}`;
+  document.getElementById("ah-msg").textContent = "";
+  document.getElementById("btn-siguiente").style.display = "none";
+  dibujarAhorcado(0);
+  renderLetras();
+  renderTeclado();
+}
+
+// ── DIBUJO SVG ────────────────────────────────────────────────────────────────
+function dibujarAhorcado(errores) {
+  const svg = document.getElementById("ah-svg");
+  const partes = [
+    // Base
+    `<line x1="10" y1="170" x2="150" y2="170" stroke="#333" stroke-width="4" stroke-linecap="round"/>`,
+    // Poste vertical
+    `<line x1="40" y1="170" x2="40" y2="10" stroke="#333" stroke-width="4" stroke-linecap="round"/>`,
+    // Poste horizontal
+    `<line x1="40" y1="10" x2="110" y2="10" stroke="#333" stroke-width="4" stroke-linecap="round"/>`,
+    // Cuerda
+    `<line x1="110" y1="10" x2="110" y2="35" stroke="#333" stroke-width="3" stroke-linecap="round"/>`,
+    // Cabeza
+    `<circle cx="110" cy="50" r="15" stroke="#e74c3c" stroke-width="3" fill="none"/>`,
+    // Cuerpo
+    `<line x1="110" y1="65" x2="110" y2="115" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+    // Brazo izq
+    `<line x1="110" y1="80" x2="85" y2="100" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+    // Brazo der
+    `<line x1="110" y1="80" x2="135" y2="100" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+    // Pierna izq
+    `<line x1="110" y1="115" x2="85" y2="145" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+    // Pierna der
+    `<line x1="110" y1="115" x2="135" y2="145" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+  ];
+  // Siempre mostrar la estructura (base, poste, horizontal, cuerda)
+  const estructura = partes.slice(0, 4).join("");
+  // Partes del cuerpo según errores (0=ninguna, 1=cabeza, 2=cuerpo, etc.)
+  const cuerpo = partes.slice(4, 4 + errores).join("");
+  svg.innerHTML = estructura + cuerpo;
+}
+
+// ── LETRAS Y TECLADO ──────────────────────────────────────────────────────────
+function renderLetras() {
+  const { palabra, letrasAdivinadas } = ahState;
+  const el = document.getElementById("ah-letras");
+  el.innerHTML = palabra.split("").map(l => {
+    const mostrar = letrasAdivinadas.has(l) || l === "-" || l === " ";
+    return `<div style="
+      width:32px;height:40px;border-bottom:3px solid #2d3a8c;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.3rem;font-weight:800;color:#2d3a8c;
+      text-transform:uppercase;
+    ">${mostrar ? l : ""}</div>`;
+  }).join("");
+}
+
+function renderTeclado() {
+  const { letrasAdivinadas, terminado } = ahState;
+  const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZÑ";
+  const el = document.getElementById("ah-teclado");
+  el.innerHTML = letras.split("").map(l => {
+    const usada = letrasAdivinadas.has(l);
+    const esCorrecta = usada && ahState.palabra.includes(l);
+    const esError = usada && !ahState.palabra.includes(l);
+    return `<button
+      onclick="adivinarLetra('${l}')"
+      ${usada || terminado ? "disabled" : ""}
+      style="
+        width:34px;height:34px;border:none;border-radius:6px;
+        font-weight:700;font-size:0.85rem;cursor:${usada || terminado ? "default" : "pointer"};
+        background:${esCorrecta ? "#28a745" : esError ? "#dc3545" : "#e0e7ff"};
+        color:${usada ? "white" : "#2d3a8c"};
+        transition:all 0.15s;
+        opacity:${usada ? "0.7" : "1"};
+      ">${l}</button>`;
+  }).join("");
+}
+
+// ── LÓGICA DEL JUEGO ──────────────────────────────────────────────────────────
+function adivinarLetra(letra) {
+  if (ahState.terminado) return;
+  const { palabra } = ahState;
+  ahState.letrasAdivinadas.add(letra);
+
+  if (!palabra.includes(letra)) {
+    ahState.errores++;
+    dibujarAhorcado(ahState.errores);
+    if (ahState.errores >= ahState.maxErrores) {
+      ahState.terminado = true;
+      document.getElementById("ah-msg").innerHTML = `<span style="color:#dc3545;">💀 ¡Perdiste! La palabra era: <strong>${palabra}</strong></span>`;
+      mostrarSiguiente();
+    }
+  } else {
+    // Verificar si ganó
+    const todasAdivinadas = palabra.split("").every(l => ahState.letrasAdivinadas.has(l) || l === "-" || l === " ");
+    if (todasAdivinadas) {
+      ahState.terminado = true;
+      document.getElementById("ah-msg").innerHTML = `<span style="color:#28a745;">🎉 ¡Correcto! +1 punto</span>`;
+      mostrarSiguiente();
+    }
+  }
+
+  renderLetras();
+  renderTeclado();
+}
+
+function mostrarSiguiente() {
+  const { indice, palabras } = ahState;
+  const btnSig = document.getElementById("btn-siguiente");
+  if (indice < palabras.length - 1) {
+    btnSig.style.display = "inline-flex";
+    btnSig.textContent = `➡️ Siguiente (${indice + 2}/${palabras.length})`;
+  } else {
+    btnSig.style.display = "inline-flex";
+    btnSig.textContent = "🏁 Ver resultado";
+    btnSig.onclick = mostrarResultadoFinal;
+  }
+}
+
+function siguientePalabra() {
+  ahState.indice++;
+  iniciarPalabra();
+}
+
+function mostrarResultadoFinal() {
+  const { palabras } = ahState;
+  toast(`¡Ahorcado completado! ${palabras.length} palabras jugadas 🏆`, "success");
+  document.getElementById("btn-siguiente").style.display = "none";
+  document.getElementById("ah-msg").innerHTML = `<span style="color:#2d3a8c;font-size:1.1rem;">🏆 ¡Completaste todas las palabras!</span>`;
+}
+
+// ── AUTOGUARDADO ──────────────────────────────────────────────────────────────
+async function autoGuardarAhorcado(titulo, palabras) {
+  if (Auth.getRol() !== "usuario") return;
+  const status = document.getElementById("ah-autosave-status");
+  if (status) status.textContent = "💾 Guardando automáticamente...";
+  const data = await apiFetch("/ahorcado", {
+    method: "POST",
+    body: JSON.stringify({ titulo, palabras }),
+  });
+  if (!data?.exito) {
+    if (status) status.textContent = "⚠️ " + (data?.mensaje || "No se pudo autoguardar");
+    return;
+  }
+  if (status) status.textContent = `✅ Guardado automáticamente (ID: ${data.datos.id})`;
+  await cargarContador(); await cargarHistorial();
+}
+
+// ── VER ───────────────────────────────────────────────────────────────────────
+async function verAhorcado(id) {
+  const data = await apiFetch(`/ahorcado/${id}`);
+  if (!data?.exito) { toast("Error al cargar", "error"); return; }
+  const a = data.datos;
+  document.getElementById("ah-titulo").value = a.titulo;
+  document.getElementById("ah-words-container").innerHTML = "";
+  a.palabras.forEach(p => addAhWord(p.word || p, p.pista || ""));
+  ahState = { palabras: a.palabras, indice: 0, terminado: false };
+  iniciarPalabra();
+  document.getElementById("ah-placeholder").style.display = "none";
+  document.getElementById("ah-result").style.display = "block";
+  document.getElementById("ah-result-title").textContent = a.titulo;
+  document.getElementById("ah-badge").textContent = `${a.palabras.length} palabras`;
+  toast("Ahorcado cargado ✓", "success");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function eliminarAhorcado(id) {
+  if (!confirm("¿Eliminar este ahorcado?")) return;
+  const data = await apiFetch(`/ahorcado/${id}`, { method: "DELETE" });
+  if (!data?.exito) { toast("Error al eliminar", "error"); return; }
+  toast("Ahorcado eliminado", "success");
+  await cargarHistorial(); await cargarContador();
+}
+
+// ── EXPORTAR IFRAME ───────────────────────────────────────────────────────────
+function exportarIframeAh(id, titulo, numPalabras) {
+  const baseUrl = window.location.origin + "/";
+  const iframeUrl = `${baseUrl}visor_ahorcado.html?id=${id}`;
+  const alto = numPalabras <= 3 ? 520 : numPalabras <= 6 ? 580 : 640;
+  const codigo = `<iframe allow="fullscreen; autoplay; allow-top-navigation-by-user-activation" allowfullscreen width="795" height="${alto}" frameborder="0" src="${iframeUrl}" title="${titulo}"></iframe>`;
+  mostrarModalIframe(titulo, codigo);
+}
+
+function mostrarModalIframe(titulo, codigo) {
+  let modal = document.getElementById("modal-iframe");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "modal-iframe";
+    modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;";
+    modal.innerHTML = `
+      <div style="background:white;border-radius:16px;padding:32px;max-width:640px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+        <h3 id="modal-iframe-titulo" style="margin-bottom:16px;font-size:1.1rem;">🔗 Código de inserción</h3>
+        <p style="font-size:0.88rem;color:#666;margin-bottom:12px;">Copia este código y pégalo en tu plataforma educativa:</p>
+        <textarea id="modal-iframe-code" readonly style="width:100%;height:110px;font-family:monospace;font-size:0.8rem;border:1px solid #ddd;border-radius:8px;padding:10px;resize:none;background:#f8f9ff;"></textarea>
+        <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+          <button onclick="copiarCodigoIframe()" class="btn btn-primary btn-sm">📋 Copiar código</button>
+          <button onclick="document.getElementById('modal-iframe').remove()" class="btn btn-outline btn-sm">Cerrar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener("click", e => { if (e.target === modal) modal.remove(); });
+  }
+  document.getElementById("modal-iframe-titulo").textContent = `🔗 Exportar: ${titulo}`;
+  document.getElementById("modal-iframe-code").value = codigo;
+}
+
+function copiarCodigoIframe() {
+  const ta = document.getElementById("modal-iframe-code");
+  ta.select(); ta.setSelectionRange(0, 99999);
+  navigator.clipboard?.writeText(ta.value)
+    .then(() => toast("¡Código copiado! 📋", "success"))
+    .catch(() => { document.execCommand("copy"); toast("¡Código copiado! 📋", "success"); });
+}
+</script>
+</body>
+</html>

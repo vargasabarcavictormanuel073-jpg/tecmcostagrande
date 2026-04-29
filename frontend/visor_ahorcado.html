@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ahorcado | EducaTec</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+
+    /* ── HEADER ── */
+    .header { width: 100%; max-width: 700px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    h2 { font-size: 1.25rem; color: #2d3a8c; }
+
+    /* ── CRONÓMETRO ── */
+    .timer-box { display:flex;align-items:center;gap:8px;background:white;border:2px solid #e0e7ff;border-radius:12px;padding:6px 16px;box-shadow:0 2px 8px rgba(45,58,140,0.08); }
+    .timer-display { font-size:1.4rem;font-weight:800;color:#2d3a8c;font-variant-numeric:tabular-nums;letter-spacing:1px;min-width:60px;text-align:center; }
+    .timer-display.warning { color:#d97706; }
+    .timer-display.danger  { color:#dc2626;animation:pulse 0.8s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.5} }
+
+    /* ── PROGRESO ── */
+    .progress-wrap { width:100%;max-width:700px;margin-bottom:14px; }
+    .progress-bar-bg { height:8px;background:#e0e7ff;border-radius:50px;overflow:hidden; }
+    .progress-bar-fill { height:100%;background:linear-gradient(90deg,#2d3a8c,#28a745);border-radius:50px;transition:width 0.4s ease;width:0%; }
+    .progress-label { font-size:0.78rem;color:#6b7280;margin-top:4px;text-align:right; }
+
+    /* ── JUEGO ── */
+    .game-wrap { width:100%;max-width:700px;background:white;border-radius:16px;padding:24px;box-shadow:0 4px 20px rgba(45,58,140,0.1); }
+    .game-inner { display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap; }
+
+    /* SVG ahorcado */
+    .svg-wrap { flex-shrink:0; }
+
+    /* Info derecha */
+    .game-info { flex:1;min-width:220px; }
+    .pista { font-size:0.9rem;color:#6b7280;font-style:italic;margin-bottom:14px;padding:10px 14px;background:#f8f9ff;border-radius:8px;border-left:3px solid #2d3a8c; }
+    .palabra-wrap { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;justify-content:center; }
+    .letra-slot { width:34px;height:44px;border-bottom:3px solid #2d3a8c;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:#2d3a8c;text-transform:uppercase;transition:all 0.2s; }
+    .letra-slot.reveal { animation:popIn 0.3s ease; }
+    @keyframes popIn { 0%{transform:scale(0.5);opacity:0}100%{transform:scale(1);opacity:1} }
+
+    /* Teclado */
+    .teclado { display:flex;flex-wrap:wrap;gap:5px;max-width:320px; }
+    .tecla { width:34px;height:34px;border:none;border-radius:6px;font-weight:700;font-size:0.82rem;cursor:pointer;background:#e0e7ff;color:#2d3a8c;transition:all 0.15s; }
+    .tecla:hover:not(:disabled) { background:#c7d2fe;transform:translateY(-1px); }
+    .tecla:disabled { cursor:default; }
+    .tecla.correcta { background:#28a745;color:white;opacity:0.8; }
+    .tecla.error    { background:#dc3545;color:white;opacity:0.8; }
+
+    /* Mensaje */
+    .msg { margin-top:14px;font-size:1rem;font-weight:700;text-align:center;min-height:28px; }
+    .msg.win  { color:#28a745; }
+    .msg.lose { color:#dc3545; }
+
+    /* Errores */
+    .errores-wrap { display:flex;gap:6px;margin-bottom:12px;align-items:center; }
+    .error-dot { width:12px;height:12px;border-radius:50%;background:#e0e7ff;transition:background 0.3s; }
+    .error-dot.activo { background:#dc3545; }
+
+    /* Botones */
+    .actions { display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;justify-content:center; }
+    .btn { padding:8px 18px;border:none;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;transition:opacity 0.15s,transform 0.1s; }
+    .btn:hover { opacity:0.88;transform:translateY(-1px); }
+    .btn-primary  { background:#2d3a8c;color:white; }
+    .btn-gray     { background:#e5e7eb;color:#374151; }
+
+    /* Resultado final */
+    .resultado-final { display:none;flex-direction:column;align-items:center;gap:10px;background:white;border-radius:16px;padding:28px 32px;box-shadow:0 8px 32px rgba(45,58,140,0.15);margin-top:16px;text-align:center;max-width:420px;width:100%;animation:fadeUp 0.4s ease; }
+    .resultado-final.show { display:flex; }
+    .resultado-emoji { font-size:3.5rem; }
+    .resultado-titulo { font-size:1.3rem;font-weight:800;color:#2d3a8c; }
+    .resultado-tiempo { font-size:2rem;font-weight:800;color:#28a745; }
+    .resultado-score  { font-size:1.1rem;font-weight:700;color:#2d3a8c; }
+    .resultado-sub    { font-size:0.88rem;color:#6b7280; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+
+    /* Confeti */
+    .confeti-piece { position:fixed;border-radius:2px;animation:caer linear forwards;pointer-events:none;z-index:9999; }
+    @keyframes caer { 0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+    .msg-carga { text-align:center;padding:60px 20px;color:#888;font-size:1rem; }
+    .branding { font-size:0.72rem;color:#bbb;margin-top:16px; }
+    .branding a { color:#2d3a8c;text-decoration:none;font-weight:600; }
+  </style>
+</head>
+<body>
+  <div id="app"><div class="msg-carga">⏳ Cargando ahorcado...</div></div>
+
+  <script>
+    const API = "/api";
+
+    // ── ESTADO ────────────────────────────────────────────────────
+    let state = {
+      palabras: [], indice: 0, palabra: "", pista: "",
+      letrasAdivinadas: new Set(), errores: 0, maxErrores: 6,
+      terminado: false, aciertos: 0,
+    };
+
+    // ── CRONÓMETRO ────────────────────────────────────────────────
+    let timerSecs = 0, timerInterval = null, timerStarted = false, timerStopped = false;
+    function startTimer() {
+      if (timerStarted) return; timerStarted = true;
+      timerInterval = setInterval(() => { timerSecs++; updateTimerDisplay(); }, 1000);
+    }
+    function stopTimer() { clearInterval(timerInterval); timerStopped = true; }
+    function updateTimerDisplay() {
+      const el = document.getElementById("timer-display"); if (!el) return;
+      const m = String(Math.floor(timerSecs/60)).padStart(2,"0"), s = String(timerSecs%60).padStart(2,"0");
+      el.textContent = `${m}:${s}`;
+      el.className = "timer-display" + (timerSecs>=300?" danger":timerSecs>=120?" warning":"");
+    }
+    function formatTiempo(secs) {
+      const m=Math.floor(secs/60), s=secs%60;
+      return m===0 ? `${s} segundos` : `${m} min ${s>0?s+" seg":""}`;
+    }
+
+    // ── CONFETI ───────────────────────────────────────────────────
+    function lanzarConfeti() {
+      const colores=["#2d3a8c","#28a745","#fbbf24","#ef4444","#8b5cf6","#06b6d4","#f97316"];
+      for(let i=0;i<80;i++){
+        const p=document.createElement("div"); p.className="confeti-piece";
+        p.style.cssText=`left:${Math.random()*100}vw;background:${colores[Math.floor(Math.random()*colores.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.8}s;border-radius:${Math.random()>0.5?"50%":"2px"};`;
+        document.body.appendChild(p); setTimeout(()=>p.remove(),4000);
+      }
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      if (!id) { document.getElementById("app").innerHTML='<div class="msg-carga">❌ No se especificó un ahorcado.</div>'; return; }
+      try {
+        const res = await fetch(`${API}/ahorcado/publico/${id}`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!data.exito) throw new Error();
+        state.palabras = data.datos.palabras;
+        renderApp(data.datos);
+      } catch {
+        document.getElementById("app").innerHTML='<div class="msg-carga">❌ No se pudo cargar el ahorcado.</div>';
+      }
+    }
+
+    // ── RENDER APP ────────────────────────────────────────────────
+    function renderApp(datos) {
+      const total = datos.palabras.length;
+      document.getElementById("app").innerHTML = `
+        <div class="header">
+          <h2>🪢 ${datos.titulo}</h2>
+          <div class="timer-box"><span>⏱️</span><span class="timer-display" id="timer-display">00:00</span></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+          <div class="progress-label" id="progress-label">Palabra 1 de ${total}</div>
+        </div>
+        <div class="game-wrap">
+          <div class="game-inner">
+            <div class="svg-wrap"><svg id="ah-svg" width="150" height="175" viewBox="0 0 160 180"></svg></div>
+            <div class="game-info">
+              <div class="pista" id="ah-pista"></div>
+              <div class="errores-wrap" id="ah-errores"></div>
+              <div class="palabra-wrap" id="ah-palabra"></div>
+              <div class="teclado" id="ah-teclado"></div>
+              <div class="msg" id="ah-msg"></div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" id="btn-siguiente" style="display:none;" onclick="siguientePalabra()">➡️ Siguiente</button>
+            <button class="btn btn-gray" onclick="reiniciar()">🔄 Reiniciar</button>
+          </div>
+        </div>
+        <div class="resultado-final" id="resultado-final">
+          <div class="resultado-emoji" id="res-emoji">🏆</div>
+          <div class="resultado-titulo">¡Ahorcado completado!</div>
+          <div class="resultado-score" id="res-score">—</div>
+          <div class="resultado-tiempo" id="res-tiempo">—</div>
+          <div class="resultado-sub" id="res-sub">—</div>
+          <button class="btn btn-primary" onclick="reiniciar()" style="margin-top:8px;">🔄 Jugar de nuevo</button>
+        </div>
+        <div class="branding"><img src="/EducatecLog.jpg" alt="EducaTec" style="height:22px;vertical-align:middle;border-radius:4px;margin-right:5px;">Actividad creada con <a href="#" target="_blank">EducaTec</a></div>`;
+      iniciarPalabra();
+    }
+
+    // ── INICIAR PALABRA ───────────────────────────────────────────
+    function iniciarPalabra() {
+      const { palabras, indice } = state;
+      const p = palabras[indice];
+      state.palabra = (p.word || p).toUpperCase();
+      state.pista = p.pista || "Adivina la palabra";
+      state.letrasAdivinadas = new Set();
+      state.errores = 0;
+      state.terminado = false;
+
+      document.getElementById("ah-pista").textContent = `💡 Pista: ${state.pista}`;
+      document.getElementById("ah-msg").textContent = "";
+      document.getElementById("ah-msg").className = "msg";
+      document.getElementById("btn-siguiente").style.display = "none";
+
+      // Progreso
+      const total = state.palabras.length;
+      const pct = Math.round((indice / total) * 100);
+      document.getElementById("progress-fill").style.width = pct + "%";
+      document.getElementById("progress-label").textContent = `Palabra ${indice+1} de ${total}`;
+
+      dibujarAhorcado(0);
+      renderErrores();
+      renderPalabra();
+      renderTeclado();
+    }
+
+    // ── SVG ───────────────────────────────────────────────────────
+    function dibujarAhorcado(errores) {
+      const svg = document.getElementById("ah-svg"); if (!svg) return;
+      const estructura = `
+        <line x1="10" y1="170" x2="150" y2="170" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+        <line x1="40" y1="170" x2="40" y2="10" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+        <line x1="40" y1="10" x2="110" y2="10" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+        <line x1="110" y1="10" x2="110" y2="35" stroke="#334155" stroke-width="3" stroke-linecap="round"/>`;
+      const partesCuerpo = [
+        `<circle cx="110" cy="50" r="15" stroke="#e74c3c" stroke-width="3" fill="#fff0f0"/>`,
+        `<line x1="110" y1="65" x2="110" y2="115" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+        `<line x1="110" y1="80" x2="85" y2="100" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+        `<line x1="110" y1="80" x2="135" y2="100" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+        `<line x1="110" y1="115" x2="85" y2="145" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+        `<line x1="110" y1="115" x2="135" y2="145" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>`,
+      ];
+      svg.innerHTML = estructura + partesCuerpo.slice(0, errores).join("");
+    }
+
+    // ── ERRORES DOTS ──────────────────────────────────────────────
+    function renderErrores() {
+      const el = document.getElementById("ah-errores"); if (!el) return;
+      el.innerHTML = `<span style="font-size:0.8rem;color:#6b7280;margin-right:6px;">Errores:</span>` +
+        Array.from({length: state.maxErrores}, (_, i) =>
+          `<div class="error-dot ${i < state.errores ? "activo" : ""}"></div>`
+        ).join("");
+    }
+
+    // ── PALABRA ───────────────────────────────────────────────────
+    function renderPalabra() {
+      const el = document.getElementById("ah-palabra"); if (!el) return;
+      el.innerHTML = state.palabra.split("").map(l => {
+        const mostrar = state.letrasAdivinadas.has(l) || l === "-" || l === " ";
+        return `<div class="letra-slot ${mostrar && l !== " " ? "reveal" : ""}">${mostrar ? l : ""}</div>`;
+      }).join("");
+    }
+
+    // ── TECLADO ───────────────────────────────────────────────────
+    function renderTeclado() {
+      const el = document.getElementById("ah-teclado"); if (!el) return;
+      const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZÑ";
+      el.innerHTML = letras.split("").map(l => {
+        const usada = state.letrasAdivinadas.has(l);
+        const correcta = usada && state.palabra.includes(l);
+        const erronea = usada && !state.palabra.includes(l);
+        return `<button class="tecla ${correcta?"correcta":erronea?"error":""}"
+          onclick="adivinar('${l}')"
+          ${usada || state.terminado ? "disabled" : ""}>${l}</button>`;
+      }).join("");
+    }
+
+    // ── ADIVINAR ──────────────────────────────────────────────────
+    function adivinar(letra) {
+      if (state.terminado) return;
+      startTimer();
+      state.letrasAdivinadas.add(letra);
+
+      if (!state.palabra.includes(letra)) {
+        state.errores++;
+        dibujarAhorcado(state.errores);
+        renderErrores();
+        if (state.errores >= state.maxErrores) {
+          state.terminado = true;
+          const msg = document.getElementById("ah-msg");
+          msg.textContent = `💀 ¡Perdiste! Era: ${state.palabra}`;
+          msg.className = "msg lose";
+          mostrarBotonSiguiente();
+        }
+      } else {
+        const todasAdivinadas = state.palabra.split("").every(l => state.letrasAdivinadas.has(l) || l==="-" || l===" ");
+        if (todasAdivinadas) {
+          state.terminado = true;
+          state.aciertos++;
+          const msg = document.getElementById("ah-msg");
+          msg.textContent = "🎉 ¡Correcto!";
+          msg.className = "msg win";
+          mostrarBotonSiguiente();
+        }
+      }
+      renderPalabra();
+      renderTeclado();
+    }
+
+    function mostrarBotonSiguiente() {
+      const btn = document.getElementById("btn-siguiente"); if (!btn) return;
+      const { indice, palabras } = state;
+      if (indice < palabras.length - 1) {
+        btn.style.display = "inline-flex";
+        btn.textContent = `➡️ Siguiente (${indice+2}/${palabras.length})`;
+        btn.onclick = siguientePalabra;
+      } else {
+        btn.style.display = "inline-flex";
+        btn.textContent = "🏁 Ver resultado";
+        btn.onclick = mostrarResultadoFinal;
+      }
+    }
+
+    function siguientePalabra() {
+      state.indice++;
+      iniciarPalabra();
+    }
+
+    function mostrarResultadoFinal() {
+      stopTimer();
+      const total = state.palabras.length;
+      const pct = Math.round((state.aciertos / total) * 100);
+      if (pct >= 70) lanzarConfeti();
+
+      document.getElementById("progress-fill").style.width = "100%";
+      document.getElementById("progress-label").textContent = `${total} / ${total} palabras`;
+
+      const res = document.getElementById("resultado-final");
+      res.classList.add("show");
+      document.getElementById("res-emoji").textContent = pct >= 80 ? "🏆" : pct >= 50 ? "👍" : "💪";
+      document.getElementById("res-score").textContent = `${state.aciertos} / ${total} palabras correctas (${pct}%)`;
+      document.getElementById("res-tiempo").textContent = formatTiempo(timerSecs);
+      const rating = pct===100 ? "⚡ ¡Perfecto!" : pct>=80 ? "🌟 ¡Excelente!" : pct>=50 ? "👍 ¡Buen trabajo!" : "💪 ¡Sigue practicando!";
+      document.getElementById("res-sub").textContent = rating;
+    }
+
+    function reiniciar() { location.reload(); }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sopa de Letras | EducaTec</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 16px; }
+
+    /* ── HEADER ── */
+    .header { width: 100%; max-width: 760px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .titulo-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    h2 { font-size: 1.25rem; color: #2d3a8c; }
+    .badge { display: inline-block; padding: 3px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; }
+    .badge-success { background: #d1fae5; color: #065f46; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger  { background: #fee2e2; color: #991b1b; }
+
+    /* ── CRONÓMETRO ── */
+    .timer-box {
+      display: flex; align-items: center; gap: 8px;
+      background: white; border: 2px solid #e0e7ff;
+      border-radius: 12px; padding: 6px 16px;
+      box-shadow: 0 2px 8px rgba(45,58,140,0.08);
+    }
+    .timer-icon { font-size: 1.1rem; }
+    .timer-display {
+      font-size: 1.4rem; font-weight: 800;
+      color: #2d3a8c; font-variant-numeric: tabular-nums;
+      letter-spacing: 1px; min-width: 60px; text-align: center;
+    }
+    .timer-display.warning { color: #d97706; }
+    .timer-display.danger  { color: #dc2626; animation: pulse 0.8s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    /* ── PROGRESO ── */
+    .progress-wrap { width: 100%; max-width: 760px; margin-bottom: 10px; }
+    .progress-bar-bg { height: 8px; background: #e0e7ff; border-radius: 50px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #2d3a8c, #28a745); border-radius: 50px; transition: width 0.4s ease; width: 0%; }
+    .progress-label { font-size: 0.78rem; color: #6b7280; margin-top: 4px; text-align: right; }
+
+    /* ── GRID ── */
+    .wordsearch-grid { display: inline-grid; gap: 3px; }
+    .ws-cell {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.88rem; border-radius: 6px;
+      background: #e8eeff; cursor: pointer; user-select: none; text-transform: uppercase;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .ws-cell:hover { background: #c7d2fe; }
+    .ws-cell.found { background: #28a745; color: white; transform: scale(1.05); }
+    .ws-cell.highlight { background: #fbbf24; color: #1a1a1a; }
+
+    /* ── CHIPS ── */
+    .word-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; justify-content: center; max-width: 760px; }
+    .word-chip {
+      background: #e0e7ff; color: #2d3a8c; padding: 4px 14px;
+      border-radius: 50px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    .word-chip.found { background: #28a745; color: white; text-decoration: line-through; opacity: 0.8; }
+
+    /* ── BOTONES ── */
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; justify-content: center; }
+    .btn { padding: 8px 18px; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-primary  { background: #2d3a8c; color: white; }
+    .btn-outline  { background: transparent; border: 2px solid #2d3a8c; color: #2d3a8c; }
+    .btn-gray     { background: #e5e7eb; color: #374151; }
+
+    /* ── RESULTADO FINAL ── */
+    .resultado-final {
+      display: none; flex-direction: column; align-items: center; gap: 10px;
+      background: white; border-radius: 16px; padding: 28px 32px;
+      box-shadow: 0 8px 32px rgba(45,58,140,0.15);
+      margin-top: 16px; text-align: center; max-width: 400px; width: 100%;
+      animation: fadeUp 0.4s ease;
+    }
+    .resultado-final.show { display: flex; }
+    .resultado-emoji { font-size: 3.5rem; }
+    .resultado-titulo { font-size: 1.3rem; font-weight: 800; color: #2d3a8c; }
+    .resultado-tiempo { font-size: 2rem; font-weight: 800; color: #28a745; }
+    .resultado-sub { font-size: 0.88rem; color: #6b7280; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── CONFETI ── */
+    .confeti-piece {
+      position: fixed; width: 10px; height: 10px; border-radius: 2px;
+      animation: caer linear forwards;
+      pointer-events: none; z-index: 9999;
+    }
+    @keyframes caer {
+      0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .msg { text-align: center; padding: 60px 20px; color: #888; font-size: 1rem; }
+    .branding { font-size: 0.72rem; color: #bbb; margin-top: 16px; }
+    .branding a { color: #2d3a8c; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div id="app"><div class="msg">⏳ Cargando sopa de letras...</div></div>
+
+  <script>
+    const API = "/api";
+    let wsState = { grid:[], size:15, placedWords:[], foundWords:new Set(), selecting:false, startCell:null, selectedCells:[], showSol:false };
+
+    // ── CRONÓMETRO ────────────────────────────────────────────────
+    let timerSecs = 0, timerInterval = null, timerStarted = false, timerStopped = false;
+
+    function startTimer() {
+      if (timerStarted) return;
+      timerStarted = true;
+      timerInterval = setInterval(() => {
+        timerSecs++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerStopped = true;
+    }
+
+    function updateTimerDisplay() {
+      const el = document.getElementById("timer-display");
+      if (!el) return;
+      const m = String(Math.floor(timerSecs / 60)).padStart(2, "0");
+      const s = String(timerSecs % 60).padStart(2, "0");
+      el.textContent = `${m}:${s}`;
+      el.className = "timer-display" + (timerSecs >= 300 ? " danger" : timerSecs >= 120 ? " warning" : "");
+    }
+
+    function formatTiempo(secs) {
+      const m = Math.floor(secs / 60), s = secs % 60;
+      if (m === 0) return `${s} segundos`;
+      return `${m} min ${s > 0 ? s + " seg" : ""}`;
+    }
+
+    // ── CONFETI ───────────────────────────────────────────────────
+    function lanzarConfeti() {
+      const colores = ["#2d3a8c","#28a745","#fbbf24","#ef4444","#8b5cf6","#06b6d4","#f97316"];
+      for (let i = 0; i < 80; i++) {
+        const p = document.createElement("div");
+        p.className = "confeti-piece";
+        p.style.cssText = `
+          left: ${Math.random() * 100}vw;
+          background: ${colores[Math.floor(Math.random() * colores.length)]};
+          width: ${6 + Math.random() * 8}px;
+          height: ${6 + Math.random() * 8}px;
+          animation-duration: ${1.5 + Math.random() * 2}s;
+          animation-delay: ${Math.random() * 0.8}s;
+          border-radius: ${Math.random() > 0.5 ? "50%" : "2px"};
+        `;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 4000);
+      }
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      if (!id) { document.getElementById("app").innerHTML = '<div class="msg">❌ No se especificó una sopa.</div>'; return; }
+
+      const token = localStorage.getItem("ep_token");
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      try {
+        const res = await fetch(`${API}/sopas/${id}`, { headers });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!data.exito || !data.datos.grid_data) throw new Error();
+        const s = data.datos;
+        wsState = { grid: s.grid_data.grid, size: s.tamano, placedWords: s.grid_data.placed, foundWords: new Set(), selecting: false, startCell: null, selectedCells: [], showSol: false };
+        renderApp(s);
+      } catch {
+        document.getElementById("app").innerHTML = '<div class="msg">❌ No se pudo cargar la sopa.</div>';
+      }
+    }
+
+    // ── RENDER ────────────────────────────────────────────────────
+    function renderApp(s) {
+      const size = s.tamano;
+      const badge = size <= 10 ? '<span class="badge badge-success">Fácil</span>'
+                  : size <= 15 ? '<span class="badge badge-warning">Medio</span>'
+                  : '<span class="badge badge-danger">Difícil</span>';
+      const total = s.grid_data.placed.length;
+
+      document.getElementById("app").innerHTML = `
+        <div class="header">
+          <div class="titulo-wrap">
+            <h2>${s.titulo}</h2>${badge}
+          </div>
+          <div class="timer-box">
+            <span class="timer-icon">⏱️</span>
+            <span class="timer-display" id="timer-display">00:00</span>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+          <div class="progress-label" id="progress-label">0 / ${total} palabras</div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <div class="wordsearch-grid" id="ws-grid" style="grid-template-columns:repeat(${size},32px)"></div>
+        </div>
+
+        <div class="word-chips" id="ws-chips"></div>
+
+        <div class="actions">
+          <button class="btn btn-primary" onclick="checkSopa()">✅ Verificar</button>
+          <button class="btn btn-outline" onclick="toggleSol()">💡 Solución</button>
+          <button class="btn btn-gray" onclick="reiniciar()">🔄 Reiniciar</button>
+        </div>
+
+        <div class="resultado-final" id="resultado-final">
+          <div class="resultado-emoji">🏆</div>
+          <div class="resultado-titulo">¡Sopa completada!</div>
+          <div class="resultado-tiempo" id="resultado-tiempo">—</div>
+          <div class="resultado-sub" id="resultado-sub">—</div>
+          <button class="btn btn-primary" onclick="reiniciar()" style="margin-top:8px;">🔄 Jugar de nuevo</button>
+        </div>
+
+        <div class="branding"><img src="/EducatecLog.jpg" alt="EducaTec" style="height:22px;vertical-align:middle;border-radius:4px;margin-right:5px;">Actividad creada con <a href="#" target="_blank">EducaTec</a></div>`;
+
+      // Construir grid
+      const gridEl = document.getElementById("ws-grid");
+      for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+        const cell = document.createElement("div");
+        cell.className = "ws-cell";
+        cell.textContent = wsState.grid[r][c];
+        cell.dataset.r = r; cell.dataset.c = c;
+        cell.addEventListener("mousedown", onMD);
+        cell.addEventListener("mouseenter", onME);
+        cell.addEventListener("mouseup", onMU);
+        cell.addEventListener("touchstart", onTS, {passive:true});
+        cell.addEventListener("touchmove", onTM, {passive:true});
+        cell.addEventListener("touchend", onTE);
+        gridEl.appendChild(cell);
+      }
+
+      // Chips de palabras
+      const chips = document.getElementById("ws-chips");
+      s.palabras.forEach(w => {
+        const c = document.createElement("span");
+        c.className = "word-chip"; c.textContent = w; c.dataset.word = w;
+        chips.appendChild(c);
+      });
+    }
+
+    // ── SELECCIÓN ─────────────────────────────────────────────────
+    const getCE = (r,c) => document.querySelector(`.ws-cell[data-r="${r}"][data-c="${c}"]`);
+
+    function onMD() { startTimer(); wsState.selecting=true; wsState.startCell={r:+this.dataset.r,c:+this.dataset.c}; wsState.selectedCells=[wsState.startCell]; hlSel(); }
+    function onME() { if(!wsState.selecting)return; wsState.selectedCells=getLine(wsState.startCell,{r:+this.dataset.r,c:+this.dataset.c}); hlSel(); }
+    function onMU() { if(!wsState.selecting)return; wsState.selecting=false; checkSel(); }
+    function onTS(e) { startTimer(); const el=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); if(el?.classList.contains("ws-cell")){wsState.selecting=true;wsState.startCell={r:+el.dataset.r,c:+el.dataset.c};wsState.selectedCells=[wsState.startCell];hlSel();} }
+    function onTM(e) { if(!wsState.selecting)return; const el=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); if(el?.classList.contains("ws-cell")){wsState.selectedCells=getLine(wsState.startCell,{r:+el.dataset.r,c:+el.dataset.c});hlSel();} }
+    function onTE() { if(!wsState.selecting)return; wsState.selecting=false; checkSel(); }
+    document.addEventListener("mouseup", () => { if(wsState.selecting){wsState.selecting=false;checkSel();} });
+
+    function getLine(s,e) {
+      const dr=e.r-s.r, dc=e.c-s.c, len=Math.max(Math.abs(dr),Math.abs(dc));
+      if(!len) return [s];
+      if(Math.abs(dr)&&Math.abs(dc)&&Math.abs(dr)!==Math.abs(dc)) return [s];
+      const sr=dr?dr/Math.abs(dr):0, sc=dc?dc/Math.abs(dc):0;
+      const cells=[];
+      for(let i=0;i<=len;i++) cells.push({r:s.r+sr*i,c:s.c+sc*i});
+      return cells;
+    }
+
+    function hlSel() {
+      document.querySelectorAll(".ws-cell.highlight").forEach(e=>e.classList.remove("highlight"));
+      wsState.selectedCells.forEach(({r,c})=>{const e=getCE(r,c);if(e&&!e.classList.contains("found"))e.classList.add("highlight");});
+    }
+
+    function checkSel() {
+      document.querySelectorAll(".ws-cell.highlight").forEach(e=>e.classList.remove("highlight"));
+      const sel=wsState.selectedCells; if(sel.length<2) return;
+      for(const{word,cells} of wsState.placedWords){
+        if(wsState.foundWords.has(word)) continue;
+        if(cellsMatch(sel,cells)||cellsMatch(sel,[...cells].reverse())){
+          wsState.foundWords.add(word);
+          cells.forEach(({r,c})=>{const e=getCE(r,c);if(e){e.classList.remove("highlight");e.classList.add("found");}});
+          const chip=document.querySelector(`.word-chip[data-word="${word}"]`);
+          if(chip) chip.classList.add("found");
+          updateProgress();
+          if(wsState.foundWords.size===wsState.placedWords.length) completar();
+          return;
+        }
+      }
+    }
+
+    function cellsMatch(a,b){ return a.length===b.length&&a.every((c,i)=>c.r===b[i].r&&c.c===b[i].c); }
+
+    function updateProgress() {
+      const found=wsState.foundWords.size, total=wsState.placedWords.length;
+      const pct = Math.round((found/total)*100);
+      const fill=document.getElementById("progress-fill");
+      const label=document.getElementById("progress-label");
+      if(fill) fill.style.width=pct+"%";
+      if(label) label.textContent=`${found} / ${total} palabras`;
+    }
+
+    function completar() {
+      if(timerStopped) return;
+      stopTimer();
+      lanzarConfeti();
+      const res=document.getElementById("resultado-final");
+      const tiempoEl=document.getElementById("resultado-tiempo");
+      const subEl=document.getElementById("resultado-sub");
+      if(res){
+        res.classList.add("show");
+        tiempoEl.textContent = formatTiempo(timerSecs);
+        const rating = timerSecs < 60 ? "⚡ ¡Velocidad increíble!" : timerSecs < 180 ? "🌟 ¡Excelente tiempo!" : timerSecs < 360 ? "👍 ¡Buen trabajo!" : "💪 ¡Lo lograste!";
+        subEl.textContent = rating;
+      }
+    }
+
+    function checkSopa() {
+      const t=wsState.placedWords.length, f=wsState.foundWords.size;
+      if(f===t) completar();
+      else alert(`Encontradas: ${f} de ${t} palabras`);
+    }
+
+    function toggleSol() {
+      wsState.showSol=!wsState.showSol;
+      wsState.placedWords.forEach(({word,cells})=>cells.forEach(({r,c})=>{
+        const e=getCE(r,c);
+        if(e){ wsState.showSol ? e.classList.add("found") : (!wsState.foundWords.has(word)&&e.classList.remove("found")); }
+      }));
+    }
+
+    function reiniciar() { location.reload(); }
+
+    init();
+  </script>
+</body>
+</html>
