@@ -121,7 +121,7 @@
 <div id="toast-container"></div>
 <script src="js/app.js"></script>
 <script>
-let wsState = { grid:[], size:15, placedWords:[], foundWords:new Set(), selecting:false, startCell:null, selectedCells:[], showSol:false };
+let wsState = { grid:[], size:15, placedWords:[], foundWords:new Set(), selecting:false, startCell:null, selectedCells:[] };
 let currentGridData = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -164,7 +164,7 @@ async function verSopa(id) {
   if (!data?.exito) { toast("Error al cargar","error"); return; }
   const s = data.datos;
   if (!s.grid_data) { toast("Esta sopa no tiene datos de cuadrícula","error"); return; }
-  wsState = { grid: s.grid_data.grid, size: s.tamano, placedWords: s.grid_data.placed, foundWords: new Set(), selecting: false, startCell: null, selectedCells: [], showSol: false };
+  wsState = { grid: s.grid_data.grid, size: s.tamano, placedWords: s.grid_data.placed, foundWords: new Set(), selecting: false, startCell: null, selectedCells: [] };
   currentGridData = s.grid_data;
   renderSopa(s.titulo, s.palabras, s.grid_data.placed);
   toast("Sopa cargada ✓","success");
@@ -181,7 +181,7 @@ async function editarSopa(id) {
   s.palabras.forEach(p => addWord(p));
   
   if (s.grid_data) {
-    wsState = { grid: s.grid_data.grid, size: s.tamano, placedWords: s.grid_data.placed, foundWords: new Set(), selecting: false, startCell: null, selectedCells: [], showSol: false };
+    wsState = { grid: s.grid_data.grid, size: s.tamano, placedWords: s.grid_data.placed, foundWords: new Set(), selecting: false, startCell: null, selectedCells: [] };
     currentGridData = s.grid_data;
     renderSopa(s.titulo, s.palabras, s.grid_data.placed);
   }
@@ -224,7 +224,7 @@ async function generarSopa() {
   let result = null;
   for (let i=0;i<5;i++) { result = buildGrid(valid,size,dir); if(result) break; }
   if (!result) { toast("No se pudo generar. Intenta con un tamaño mayor.","error"); return; }
-  wsState = { grid:result.grid, size, placedWords:result.placed, foundWords:new Set(), selecting:false, startCell:null, selectedCells:[], showSol:false };
+  wsState = { grid:result.grid, size, placedWords:result.placed, foundWords:new Set(), selecting:false, startCell:null, selectedCells:[] };
   currentGridData = result;
   renderSopa(titulo, valid, result.placed);
   toast("¡Sopa generada! 🎉","success");

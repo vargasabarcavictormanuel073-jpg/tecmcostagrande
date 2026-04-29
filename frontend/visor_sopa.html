@@ -84,7 +84,6 @@
     }
     .ws-cell:hover { background: #c7d2fe; }
     .ws-cell.found    { background: #28a745; color: white; }
-    .ws-cell.solucion { background: #fbbf24; color: #1a1a1a; }  /* color distinto para solución */
     .ws-cell.highlight { background: #93c5fd; color: #1a1a1a; }
 
     /* ── CHIPS ── */
@@ -98,8 +97,7 @@
       padding: 4px 14px; border-radius: 50px;
       font-weight: 600; font-size: 0.8rem; text-transform: uppercase;
     }
-    .word-chip.found    { background: #28a745; color: white; text-decoration: line-through; }
-    .word-chip.solucion { background: #fbbf24; color: #1a1a1a; }
+    .word-chip.found { background: #28a745; color: white; text-decoration: line-through; }
 
     /* ── BOTONES ── */
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; justify-content: center; }
@@ -146,7 +144,7 @@
     const API = "/api";
     let wsState = {
       grid:[], size:15, placedWords:[], foundWords:new Set(),
-      selecting:false, startCell:null, selectedCells:[], showSol:false
+      selecting:false, startCell:null, selectedCells:[]
     };
     let sopaData = null;
 
@@ -223,7 +221,7 @@
       wsState = {
         grid: s.grid_data.grid, size: s.tamano,
         placedWords: s.grid_data.placed, foundWords: new Set(),
-        selecting: false, startCell: null, selectedCells: [], showSol: false
+        selecting: false, startCell: null, selectedCells: []
       };
       renderApp(s);
       startTimer(); // El cronómetro arranca al iniciar
@@ -313,7 +311,7 @@
       document.querySelectorAll(".ws-cell.highlight").forEach(e=>e.classList.remove("highlight"));
       wsState.selectedCells.forEach(({r,c})=>{
         const e=getCE(r,c);
-        if(e&&!e.classList.contains("found")&&!e.classList.contains("solucion"))
+        if(e&&!e.classList.contains("found"))
           e.classList.add("highlight");
       });
     }
@@ -325,13 +323,12 @@
         if(wsState.foundWords.has(word)) continue;
         if(cellsMatch(sel,cells)||cellsMatch(sel,[...cells].reverse())){
           wsState.foundWords.add(word);
-          // Quitar clase solucion si estaba y poner found
           cells.forEach(({r,c})=>{
             const e=getCE(r,c);
-            if(e){ e.classList.remove("highlight","solucion"); e.classList.add("found"); }
+            if(e){ e.classList.remove("highlight"); e.classList.add("found"); }
           });
           const chip=document.querySelector(`.word-chip[data-word="${word}"]`);
-          if(chip){ chip.classList.remove("solucion"); chip.classList.add("found"); }
+          if(chip){ chip.classList.add("found"); }
           updateProgress();
           if(wsState.foundWords.size===wsState.placedWords.length) completar();
           return;
