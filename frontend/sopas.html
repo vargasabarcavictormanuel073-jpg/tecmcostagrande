@@ -306,12 +306,6 @@ function checkSel(){
 function cellsMatch(a,b){return a.length===b.length&&a.every((c,i)=>c.r===b[i].r&&c.c===b[i].c);}
 function checkSopa(){const t=wsState.placedWords.length,f=wsState.foundWords.size;toast(`Encontradas: ${f}/${t}`,f===t?"success":"");}
 
-function toggleSolucion(){
-  wsState.showSol=!wsState.showSol;
-  wsState.placedWords.forEach(({word,cells})=>cells.forEach(({r,c})=>{const e=getCE(r,c);if(e){wsState.showSol?e.classList.add("found"):(!wsState.foundWords.has(word)&&e.classList.remove("found"));}}));
-  toast(wsState.showSol?"💡 Solución mostrada":"Solución ocultada");
-}
-
 // ── AUTOGUARDADO ──────────────────────────────────────────────────────────────
 async function autoGuardarSopa(titulo, palabras, tamano, direcciones, gridData) {
   if (Auth.getRol() !== "usuario") return;

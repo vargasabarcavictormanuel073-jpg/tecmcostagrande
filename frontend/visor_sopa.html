@@ -350,28 +350,13 @@
       if(label) label.textContent=`${found} / ${total} palabras`;
     }
 
-    // ── SOLUCIÓN — usa color amarillo, NO verde ───────────────────
-    function toggleSol() {
-      wsState.showSol = !wsState.showSol;
-      const btn = document.getElementById("btn-sol");
-      if(btn) btn.textContent = wsState.showSol ? "🙈 Ocultar" : "💡 Solución";
-
-      wsState.placedWords.forEach(({word,cells})=>{
-        if(wsState.foundWords.has(word)) return; // ya encontrada, no tocar
-        cells.forEach(({r,c})=>{
-          const e=getCE(r,c); if(!e) return;
-          if(wsState.showSol) e.classList.add("solucion");
-          else e.classList.remove("solucion");
-        });
-        const chip=document.querySelector(`.word-chip[data-word="${word}"]`);
-        if(chip){
-          if(wsState.showSol) chip.classList.add("solucion");
-          else chip.classList.remove("solucion");
-        }
-      });
+    function checkSopa() {
+      const t=wsState.placedWords.length, f=wsState.foundWords.size;
+      if(f===t) completar();
+      else alert(`Encontradas: ${f} de ${t} palabras`);
     }
 
-    function completar() {
+    function reiniciar() { location.reload(); }
       if(timerStopped) return;
       stopTimer();
       lanzarConfeti();

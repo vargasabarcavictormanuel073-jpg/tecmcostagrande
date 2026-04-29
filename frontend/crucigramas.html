@@ -278,11 +278,6 @@ function checkCW(){
   inputs.forEach(i=>{total++;if(!i.value){empty++;return;}i.style.color=i.value.toUpperCase()===i.dataset.answer?"var(--secondary)":"#dc3545";if(i.value.toUpperCase()===i.dataset.answer)ok++;});
   if(empty>0)toast(`Faltan ${empty} letras`);else if(ok===total)toast("🏆 ¡Crucigrama completado!","success");else toast(`Correctas: ${ok}/${total}`);
 }
-function revealCW(){
-  cwState.revealed=!cwState.revealed;
-  document.querySelectorAll(".cw-cell:not(.black) input").forEach(i=>{if(cwState.revealed){i.value=i.dataset.answer;i.style.color="var(--primary)";}else{i.value="";i.style.color="";}});
-  toast(cwState.revealed?"💡 Respuestas reveladas":"Respuestas ocultadas");
-}
 function clearCW(){document.querySelectorAll(".cw-cell:not(.black) input").forEach(i=>{i.value="";i.style.color="";});cwState.revealed=false;toast("Crucigrama limpiado");}
 
 // ── GUARDAR ───────────────────────────────────────────────────────────────────

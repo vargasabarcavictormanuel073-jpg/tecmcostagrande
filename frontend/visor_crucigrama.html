@@ -384,15 +384,6 @@
       }
     }
 
-    function revealCW() {
-      cwState.revealed = !cwState.revealed;
-      document.querySelectorAll(".cw-cell:not(.black) input").forEach(i => {
-        if (cwState.revealed) { i.value = i.dataset.answer; i.style.color = "#2d3a8c"; }
-        else { i.value = ""; i.style.color = ""; }
-      });
-      if (cwState.revealed) checkWordComplete();
-    }
-
     function clearCW() {
       document.querySelectorAll(".cw-cell:not(.black) input").forEach(i => { i.value = ""; i.style.color = ""; });
       document.querySelectorAll(".cw-cell").forEach(c => { c.classList.remove("correct","wrong"); });
