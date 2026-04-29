@@ -6,16 +6,49 @@
   <title>Sopa de Letras | EducaTec</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 16px; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
 
-    /* ── HEADER ── */
-    .header { width: 100%; max-width: 760px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
-    .titulo-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    h2 { font-size: 1.25rem; color: #2d3a8c; }
-    .badge { display: inline-block; padding: 3px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; }
+    /* ── PANTALLA DE INICIO ── */
+    .start-screen {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px;
+      background: white; border-radius: 20px; padding: 40px 32px;
+      box-shadow: 0 8px 32px rgba(45,58,140,0.12);
+      max-width: 420px; width: 100%; margin-top: 40px; text-align: center;
+    }
+    .start-icon { font-size: 4rem; }
+    .start-titulo { font-size: 1.4rem; font-weight: 800; color: #2d3a8c; }
+    .start-info { font-size: 0.9rem; color: #6b7280; }
+    .start-badge { display: inline-block; padding: 4px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
     .badge-success { background: #d1fae5; color: #065f46; }
     .badge-warning { background: #fef3c7; color: #92400e; }
     .badge-danger  { background: #fee2e2; color: #991b1b; }
+    .btn-start {
+      background: #2d3a8c; color: white; border: none;
+      border-radius: 12px; padding: 14px 40px;
+      font-size: 1.1rem; font-weight: 700; cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      margin-top: 8px;
+    }
+    .btn-start:hover { transform: translateY(-2px); opacity: 0.9; }
+
+    /* ── HEADER ── */
+    .header {
+      width: 100%; max-width: 700px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
+    }
+    .titulo-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    h2 { font-size: 1.15rem; color: #2d3a8c; font-weight: 800; }
+    .badge { display: inline-block; padding: 3px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; }
 
     /* ── CRONÓMETRO ── */
     .timer-box {
@@ -24,50 +57,57 @@
       border-radius: 12px; padding: 6px 16px;
       box-shadow: 0 2px 8px rgba(45,58,140,0.08);
     }
-    .timer-icon { font-size: 1.1rem; }
     .timer-display {
-      font-size: 1.4rem; font-weight: 800;
-      color: #2d3a8c; font-variant-numeric: tabular-nums;
-      letter-spacing: 1px; min-width: 60px; text-align: center;
+      font-size: 1.4rem; font-weight: 800; color: #2d3a8c;
+      font-variant-numeric: tabular-nums; letter-spacing: 1px;
+      min-width: 60px; text-align: center;
     }
     .timer-display.warning { color: #d97706; }
     .timer-display.danger  { color: #dc2626; animation: pulse 0.8s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
     /* ── PROGRESO ── */
-    .progress-wrap { width: 100%; max-width: 760px; margin-bottom: 10px; }
+    .progress-wrap { width: 100%; max-width: 700px; margin-bottom: 10px; }
     .progress-bar-bg { height: 8px; background: #e0e7ff; border-radius: 50px; overflow: hidden; }
-    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #2d3a8c, #28a745); border-radius: 50px; transition: width 0.4s ease; width: 0%; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg,#2d3a8c,#28a745); border-radius: 50px; transition: width 0.4s ease; width: 0%; }
     .progress-label { font-size: 0.78rem; color: #6b7280; margin-top: 4px; text-align: right; }
 
     /* ── GRID ── */
+    .grid-wrap { display: flex; justify-content: center; width: 100%; max-width: 700px; overflow-x: auto; }
     .wordsearch-grid { display: inline-grid; gap: 3px; }
     .ws-cell {
-      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 0.88rem; border-radius: 6px;
-      background: #e8eeff; cursor: pointer; user-select: none; text-transform: uppercase;
-      transition: background 0.12s, transform 0.1s;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; border-radius: 6px;
+      background: #e8eeff; cursor: pointer; user-select: none;
+      text-transform: uppercase; transition: background 0.12s;
     }
     .ws-cell:hover { background: #c7d2fe; }
-    .ws-cell.found { background: #28a745; color: white; transform: scale(1.05); }
-    .ws-cell.highlight { background: #fbbf24; color: #1a1a1a; }
+    .ws-cell.found    { background: #28a745; color: white; }
+    .ws-cell.solucion { background: #fbbf24; color: #1a1a1a; }  /* color distinto para solución */
+    .ws-cell.highlight { background: #93c5fd; color: #1a1a1a; }
 
     /* ── CHIPS ── */
-    .word-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; justify-content: center; max-width: 760px; }
-    .word-chip {
-      background: #e0e7ff; color: #2d3a8c; padding: 4px 14px;
-      border-radius: 50px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase;
-      transition: all 0.2s;
+    .word-chips {
+      display: flex; flex-wrap: wrap; gap: 7px;
+      margin-top: 12px; justify-content: center;
+      max-width: 700px; width: 100%;
     }
-    .word-chip.found { background: #28a745; color: white; text-decoration: line-through; opacity: 0.8; }
+    .word-chip {
+      background: #e0e7ff; color: #2d3a8c;
+      padding: 4px 14px; border-radius: 50px;
+      font-weight: 600; font-size: 0.8rem; text-transform: uppercase;
+    }
+    .word-chip.found    { background: #28a745; color: white; text-decoration: line-through; }
+    .word-chip.solucion { background: #fbbf24; color: #1a1a1a; }
 
     /* ── BOTONES ── */
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; justify-content: center; }
     .btn { padding: 8px 18px; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
     .btn:hover { opacity: 0.88; transform: translateY(-1px); }
-    .btn-primary  { background: #2d3a8c; color: white; }
-    .btn-outline  { background: transparent; border: 2px solid #2d3a8c; color: #2d3a8c; }
-    .btn-gray     { background: #e5e7eb; color: #374151; }
+    .btn-primary { background: #2d3a8c; color: white; }
+    .btn-yellow  { background: #f59e0b; color: white; }
+    .btn-gray    { background: #e5e7eb; color: #374151; }
 
     /* ── RESULTADO FINAL ── */
     .resultado-final {
@@ -78,17 +118,16 @@
       animation: fadeUp 0.4s ease;
     }
     .resultado-final.show { display: flex; }
-    .resultado-emoji { font-size: 3.5rem; }
+    .resultado-emoji  { font-size: 3.5rem; }
     .resultado-titulo { font-size: 1.3rem; font-weight: 800; color: #2d3a8c; }
     .resultado-tiempo { font-size: 2rem; font-weight: 800; color: #28a745; }
-    .resultado-sub { font-size: 0.88rem; color: #6b7280; }
+    .resultado-sub    { font-size: 0.88rem; color: #6b7280; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
     /* ── CONFETI ── */
     .confeti-piece {
-      position: fixed; width: 10px; height: 10px; border-radius: 2px;
-      animation: caer linear forwards;
-      pointer-events: none; z-index: 9999;
+      position: fixed; border-radius: 2px;
+      animation: caer linear forwards; pointer-events: none; z-index: 9999;
     }
     @keyframes caer {
       0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
@@ -96,7 +135,7 @@
     }
 
     .msg { text-align: center; padding: 60px 20px; color: #888; font-size: 1rem; }
-    .branding { font-size: 0.72rem; color: #bbb; margin-top: 16px; }
+    .branding { font-size: 0.72rem; color: #bbb; margin-top: 16px; text-align: center; }
     .branding a { color: #2d3a8c; text-decoration: none; font-weight: 600; }
   </style>
 </head>
@@ -105,7 +144,11 @@
 
   <script>
     const API = "/api";
-    let wsState = { grid:[], size:15, placedWords:[], foundWords:new Set(), selecting:false, startCell:null, selectedCells:[], showSol:false };
+    let wsState = {
+      grid:[], size:15, placedWords:[], foundWords:new Set(),
+      selecting:false, startCell:null, selectedCells:[], showSol:false
+    };
+    let sopaData = null;
 
     // ── CRONÓMETRO ────────────────────────────────────────────────
     let timerSecs = 0, timerInterval = null, timerStarted = false, timerStopped = false;
@@ -118,44 +161,26 @@
         updateTimerDisplay();
       }, 1000);
     }
-
-    function stopTimer() {
-      clearInterval(timerInterval);
-      timerStopped = true;
-    }
-
+    function stopTimer() { clearInterval(timerInterval); timerStopped = true; }
     function updateTimerDisplay() {
-      const el = document.getElementById("timer-display");
-      if (!el) return;
-      const m = String(Math.floor(timerSecs / 60)).padStart(2, "0");
-      const s = String(timerSecs % 60).padStart(2, "0");
+      const el = document.getElementById("timer-display"); if (!el) return;
+      const m = String(Math.floor(timerSecs/60)).padStart(2,"0");
+      const s = String(timerSecs%60).padStart(2,"0");
       el.textContent = `${m}:${s}`;
-      el.className = "timer-display" + (timerSecs >= 300 ? " danger" : timerSecs >= 120 ? " warning" : "");
+      el.className = "timer-display" + (timerSecs>=300?" danger":timerSecs>=120?" warning":"");
     }
-
     function formatTiempo(secs) {
-      const m = Math.floor(secs / 60), s = secs % 60;
-      if (m === 0) return `${s} segundos`;
-      return `${m} min ${s > 0 ? s + " seg" : ""}`;
+      const m=Math.floor(secs/60), s=secs%60;
+      return m===0 ? `${s} seg` : `${m} min ${s>0?s+" seg":""}`;
     }
 
     // ── CONFETI ───────────────────────────────────────────────────
     function lanzarConfeti() {
-      const colores = ["#2d3a8c","#28a745","#fbbf24","#ef4444","#8b5cf6","#06b6d4","#f97316"];
-      for (let i = 0; i < 80; i++) {
-        const p = document.createElement("div");
-        p.className = "confeti-piece";
-        p.style.cssText = `
-          left: ${Math.random() * 100}vw;
-          background: ${colores[Math.floor(Math.random() * colores.length)]};
-          width: ${6 + Math.random() * 8}px;
-          height: ${6 + Math.random() * 8}px;
-          animation-duration: ${1.5 + Math.random() * 2}s;
-          animation-delay: ${Math.random() * 0.8}s;
-          border-radius: ${Math.random() > 0.5 ? "50%" : "2px"};
-        `;
-        document.body.appendChild(p);
-        setTimeout(() => p.remove(), 4000);
+      const colores=["#2d3a8c","#28a745","#fbbf24","#ef4444","#8b5cf6","#06b6d4","#f97316"];
+      for(let i=0;i<80;i++){
+        const p=document.createElement("div"); p.className="confeti-piece";
+        p.style.cssText=`left:${Math.random()*100}vw;background:${colores[Math.floor(Math.random()*colores.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.8}s;border-radius:${Math.random()>0.5?"50%":"2px"};`;
+        document.body.appendChild(p); setTimeout(()=>p.remove(),4000);
       }
     }
 
@@ -163,61 +188,73 @@
     async function init() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
-      if (!id) { document.getElementById("app").innerHTML = '<div class="msg">❌ No se especificó una sopa.</div>'; return; }
-
-      const token = localStorage.getItem("ep_token");
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
+      if (!id) { document.getElementById("app").innerHTML='<div class="msg">❌ No se especificó una sopa.</div>'; return; }
       try {
         const res = await fetch(`${API}/sopas/publico/${id}`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         if (!data.exito || !data.datos.grid_data) throw new Error();
-        const s = data.datos;
-        wsState = { grid: s.grid_data.grid, size: s.tamano, placedWords: s.grid_data.placed, foundWords: new Set(), selecting: false, startCell: null, selectedCells: [], showSol: false };
-        renderApp(s);
+        sopaData = data.datos;
+        mostrarPantallaInicio(sopaData);
       } catch {
-        document.getElementById("app").innerHTML = '<div class="msg">❌ No se pudo cargar la sopa.</div>';
+        document.getElementById("app").innerHTML='<div class="msg">❌ No se pudo cargar la sopa.</div>';
       }
+    }
+
+    // ── PANTALLA DE INICIO ────────────────────────────────────────
+    function mostrarPantallaInicio(s) {
+      const size = s.tamano;
+      const badgeClass = size<=10?"badge-success":size<=15?"badge-warning":"badge-danger";
+      const badgeText  = size<=10?"Fácil":size<=15?"Medio":"Difícil";
+      document.getElementById("app").innerHTML = `
+        <div class="start-screen">
+          <div class="start-icon">🔠</div>
+          <div class="start-titulo">${s.titulo}</div>
+          <span class="start-badge ${badgeClass}">${badgeText} · ${size}×${size}</span>
+          <div class="start-info">${s.palabras.length} palabras para encontrar</div>
+          <button class="btn-start" onclick="iniciarJuego()">▶ Iniciar actividad</button>
+        </div>
+        <div class="branding"><img src="/EducatecLog.jpg" alt="EducaTec" style="height:20px;vertical-align:middle;border-radius:4px;margin-right:4px;">Actividad creada con <a href="#" target="_blank">EducaTec</a></div>`;
+    }
+
+    // ── INICIAR JUEGO ─────────────────────────────────────────────
+    function iniciarJuego() {
+      const s = sopaData;
+      wsState = {
+        grid: s.grid_data.grid, size: s.tamano,
+        placedWords: s.grid_data.placed, foundWords: new Set(),
+        selecting: false, startCell: null, selectedCells: [], showSol: false
+      };
+      renderApp(s);
+      startTimer(); // El cronómetro arranca al iniciar
     }
 
     // ── RENDER ────────────────────────────────────────────────────
     function renderApp(s) {
       const size = s.tamano;
-      const badge = size <= 10 ? '<span class="badge badge-success">Fácil</span>'
-                  : size <= 15 ? '<span class="badge badge-warning">Medio</span>'
+      const badge = size<=10?'<span class="badge badge-success">Fácil</span>'
+                  : size<=15?'<span class="badge badge-warning">Medio</span>'
                   : '<span class="badge badge-danger">Difícil</span>';
       const total = s.grid_data.placed.length;
 
       document.getElementById("app").innerHTML = `
         <div class="header">
-          <div class="titulo-wrap">
-            <h2>${s.titulo}</h2>${badge}
-          </div>
-          <div class="timer-box">
-            <span class="timer-icon">⏱️</span>
-            <span class="timer-display" id="timer-display">00:00</span>
-          </div>
+          <div class="titulo-wrap"><h2>${s.titulo}</h2>${badge}</div>
+          <div class="timer-box"><span>⏱️</span><span class="timer-display" id="timer-display">00:00</span></div>
         </div>
-
         <div class="progress-wrap">
           <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
           <div class="progress-label" id="progress-label">0 / ${total} palabras</div>
         </div>
-
-        <div style="overflow-x:auto;">
-          <div class="wordsearch-grid" id="ws-grid" style="grid-template-columns:repeat(${size},32px)"></div>
+        <div class="grid-wrap">
+          <div class="wordsearch-grid" id="ws-grid" style="grid-template-columns:repeat(${size},34px)"></div>
         </div>
-
         <div class="word-chips" id="ws-chips"></div>
-
         <div class="actions">
           <button class="btn btn-primary" onclick="checkSopa()">✅ Verificar</button>
-          <button class="btn btn-outline" onclick="toggleSol()">💡 Solución</button>
+          <button class="btn btn-yellow" id="btn-sol" onclick="toggleSol()">💡 Solución</button>
           <button class="btn btn-gray" onclick="reiniciar()">🔄 Reiniciar</button>
         </div>
-
         <div class="resultado-final" id="resultado-final">
           <div class="resultado-emoji">🏆</div>
           <div class="resultado-titulo">¡Sopa completada!</div>
@@ -225,12 +262,11 @@
           <div class="resultado-sub" id="resultado-sub">—</div>
           <button class="btn btn-primary" onclick="reiniciar()" style="margin-top:8px;">🔄 Jugar de nuevo</button>
         </div>
+        <div class="branding"><img src="/EducatecLog.jpg" alt="EducaTec" style="height:20px;vertical-align:middle;border-radius:4px;margin-right:4px;">Actividad creada con <a href="#" target="_blank">EducaTec</a></div>`;
 
-        <div class="branding"><img src="/EducatecLog.jpg" alt="EducaTec" style="height:22px;vertical-align:middle;border-radius:4px;margin-right:5px;">Actividad creada con <a href="#" target="_blank">EducaTec</a></div>`;
-
-      // Construir grid
+      // Grid
       const gridEl = document.getElementById("ws-grid");
-      for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+      for (let r=0; r<size; r++) for (let c=0; c<size; c++) {
         const cell = document.createElement("div");
         cell.className = "ws-cell";
         cell.textContent = wsState.grid[r][c];
@@ -244,11 +280,11 @@
         gridEl.appendChild(cell);
       }
 
-      // Chips de palabras
+      // Chips
       const chips = document.getElementById("ws-chips");
       s.palabras.forEach(w => {
         const c = document.createElement("span");
-        c.className = "word-chip"; c.textContent = w; c.dataset.word = w;
+        c.className="word-chip"; c.textContent=w; c.dataset.word=w;
         chips.appendChild(c);
       });
     }
@@ -256,13 +292,13 @@
     // ── SELECCIÓN ─────────────────────────────────────────────────
     const getCE = (r,c) => document.querySelector(`.ws-cell[data-r="${r}"][data-c="${c}"]`);
 
-    function onMD() { startTimer(); wsState.selecting=true; wsState.startCell={r:+this.dataset.r,c:+this.dataset.c}; wsState.selectedCells=[wsState.startCell]; hlSel(); }
+    function onMD() { wsState.selecting=true; wsState.startCell={r:+this.dataset.r,c:+this.dataset.c}; wsState.selectedCells=[wsState.startCell]; hlSel(); }
     function onME() { if(!wsState.selecting)return; wsState.selectedCells=getLine(wsState.startCell,{r:+this.dataset.r,c:+this.dataset.c}); hlSel(); }
     function onMU() { if(!wsState.selecting)return; wsState.selecting=false; checkSel(); }
-    function onTS(e) { startTimer(); const el=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); if(el?.classList.contains("ws-cell")){wsState.selecting=true;wsState.startCell={r:+el.dataset.r,c:+el.dataset.c};wsState.selectedCells=[wsState.startCell];hlSel();} }
+    function onTS(e) { const el=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); if(el?.classList.contains("ws-cell")){wsState.selecting=true;wsState.startCell={r:+el.dataset.r,c:+el.dataset.c};wsState.selectedCells=[wsState.startCell];hlSel();} }
     function onTM(e) { if(!wsState.selecting)return; const el=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY); if(el?.classList.contains("ws-cell")){wsState.selectedCells=getLine(wsState.startCell,{r:+el.dataset.r,c:+el.dataset.c});hlSel();} }
     function onTE() { if(!wsState.selecting)return; wsState.selecting=false; checkSel(); }
-    document.addEventListener("mouseup", () => { if(wsState.selecting){wsState.selecting=false;checkSel();} });
+    document.addEventListener("mouseup", ()=>{ if(wsState.selecting){wsState.selecting=false;checkSel();} });
 
     function getLine(s,e) {
       const dr=e.r-s.r, dc=e.c-s.c, len=Math.max(Math.abs(dr),Math.abs(dc));
@@ -276,7 +312,11 @@
 
     function hlSel() {
       document.querySelectorAll(".ws-cell.highlight").forEach(e=>e.classList.remove("highlight"));
-      wsState.selectedCells.forEach(({r,c})=>{const e=getCE(r,c);if(e&&!e.classList.contains("found"))e.classList.add("highlight");});
+      wsState.selectedCells.forEach(({r,c})=>{
+        const e=getCE(r,c);
+        if(e&&!e.classList.contains("found")&&!e.classList.contains("solucion"))
+          e.classList.add("highlight");
+      });
     }
 
     function checkSel() {
@@ -286,9 +326,13 @@
         if(wsState.foundWords.has(word)) continue;
         if(cellsMatch(sel,cells)||cellsMatch(sel,[...cells].reverse())){
           wsState.foundWords.add(word);
-          cells.forEach(({r,c})=>{const e=getCE(r,c);if(e){e.classList.remove("highlight");e.classList.add("found");}});
+          // Quitar clase solucion si estaba y poner found
+          cells.forEach(({r,c})=>{
+            const e=getCE(r,c);
+            if(e){ e.classList.remove("highlight","solucion"); e.classList.add("found"); }
+          });
           const chip=document.querySelector(`.word-chip[data-word="${word}"]`);
-          if(chip) chip.classList.add("found");
+          if(chip){ chip.classList.remove("solucion"); chip.classList.add("found"); }
           updateProgress();
           if(wsState.foundWords.size===wsState.placedWords.length) completar();
           return;
@@ -300,11 +344,32 @@
 
     function updateProgress() {
       const found=wsState.foundWords.size, total=wsState.placedWords.length;
-      const pct = Math.round((found/total)*100);
+      const pct=Math.round((found/total)*100);
       const fill=document.getElementById("progress-fill");
       const label=document.getElementById("progress-label");
       if(fill) fill.style.width=pct+"%";
       if(label) label.textContent=`${found} / ${total} palabras`;
+    }
+
+    // ── SOLUCIÓN — usa color amarillo, NO verde ───────────────────
+    function toggleSol() {
+      wsState.showSol = !wsState.showSol;
+      const btn = document.getElementById("btn-sol");
+      if(btn) btn.textContent = wsState.showSol ? "🙈 Ocultar" : "💡 Solución";
+
+      wsState.placedWords.forEach(({word,cells})=>{
+        if(wsState.foundWords.has(word)) return; // ya encontrada, no tocar
+        cells.forEach(({r,c})=>{
+          const e=getCE(r,c); if(!e) return;
+          if(wsState.showSol) e.classList.add("solucion");
+          else e.classList.remove("solucion");
+        });
+        const chip=document.querySelector(`.word-chip[data-word="${word}"]`);
+        if(chip){
+          if(wsState.showSol) chip.classList.add("solucion");
+          else chip.classList.remove("solucion");
+        }
+      });
     }
 
     function completar() {
@@ -312,13 +377,11 @@
       stopTimer();
       lanzarConfeti();
       const res=document.getElementById("resultado-final");
-      const tiempoEl=document.getElementById("resultado-tiempo");
-      const subEl=document.getElementById("resultado-sub");
       if(res){
         res.classList.add("show");
-        tiempoEl.textContent = formatTiempo(timerSecs);
-        const rating = timerSecs < 60 ? "⚡ ¡Velocidad increíble!" : timerSecs < 180 ? "🌟 ¡Excelente tiempo!" : timerSecs < 360 ? "👍 ¡Buen trabajo!" : "💪 ¡Lo lograste!";
-        subEl.textContent = rating;
+        document.getElementById("resultado-tiempo").textContent = formatTiempo(timerSecs);
+        const rating = timerSecs<60?"⚡ ¡Velocidad increíble!":timerSecs<180?"🌟 ¡Excelente tiempo!":timerSecs<360?"👍 ¡Buen trabajo!":"💪 ¡Lo lograste!";
+        document.getElementById("resultado-sub").textContent = rating;
       }
     }
 
@@ -326,14 +389,6 @@
       const t=wsState.placedWords.length, f=wsState.foundWords.size;
       if(f===t) completar();
       else alert(`Encontradas: ${f} de ${t} palabras`);
-    }
-
-    function toggleSol() {
-      wsState.showSol=!wsState.showSol;
-      wsState.placedWords.forEach(({word,cells})=>cells.forEach(({r,c})=>{
-        const e=getCE(r,c);
-        if(e){ wsState.showSol ? e.classList.add("found") : (!wsState.foundWords.has(word)&&e.classList.remove("found")); }
-      }));
     }
 
     function reiniciar() { location.reload(); }
