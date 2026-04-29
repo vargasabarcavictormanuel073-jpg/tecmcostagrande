@@ -108,6 +108,26 @@ function cerrarSesion() {
   }
 }
 
+// ── SIDEBAR MÓVIL ────────────────────────────────────────────────────────────
+// Abre/cierra el sidebar en pantallas pequeñas con el botón hamburguesa
+function toggleSidebar() {
+  const sidebar = document.querySelector(".sidebar");
+  let overlay = document.getElementById("sidebar-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "sidebar-overlay";
+    overlay.className = "sidebar-overlay";
+    overlay.onclick = closeSidebar;
+    document.body.appendChild(overlay);
+  }
+  sidebar.classList.toggle("open");
+  overlay.classList.toggle("open");
+}
+function closeSidebar() {
+  document.querySelector(".sidebar")?.classList.remove("open");
+  document.getElementById("sidebar-overlay")?.classList.remove("open");
+}
+
 // ── RENDER SIDEBAR USER ──────────────────────────────────────────────────────
 function renderSidebarUser() {
   const user = Auth.getUser();
