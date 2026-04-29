@@ -110,6 +110,7 @@
   <script>
     const API = "/api";
     let cwState = { grid:[], rows:0, cols:0, placedWords:[], revealed:false };
+    let crucigramaData = null;
 
     // ── CRONÓMETRO ────────────────────────────────────────────────
     let timerSecs = 0, timerInterval = null, timerStarted = false, timerStopped = false;
@@ -179,11 +180,29 @@
         const data = await res.json();
         if (!data.exito || !data.datos.grid_data) throw new Error();
         const c = data.datos;
+        crucigramaData = c;
         cwState = { grid: c.grid_data.grid, rows: c.grid_data.rows, cols: c.grid_data.cols, placedWords: c.grid_data.placed, revealed: false };
-        renderApp(c);
+        mostrarPantallaInicio(c);
       } catch {
         document.getElementById("app").innerHTML = '<div class="msg">❌ No se pudo cargar el crucigrama.</div>';
       }
+    }
+
+    // ── PANTALLA DE INICIO ────────────────────────────────────────
+    function mostrarPantallaInicio(c) {
+      document.getElementById("app").innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:white;border-radius:20px;padding:40px 32px;box-shadow:0 8px 32px rgba(45,58,140,0.12);max-width:420px;width:100%;margin-top:40px;text-align:center;">
+          <div style="font-size:4rem;">🧩</div>
+          <div style="font-size:1.4rem;font-weight:800;color:#2d3a8c;">${c.titulo}</div>
+          <div style="font-size:0.9rem;color:#6b7280;">${c.palabras.length} palabras para resolver</div>
+          <button onclick="iniciarJuego()" style="background:#2d3a8c;color:white;border:none;border-radius:12px;padding:14px 40px;font-size:1.1rem;font-weight:700;cursor:pointer;margin-top:8px;">▶ Iniciar actividad</button>
+        </div>
+        <div style="font-size:0.72rem;color:#bbb;margin-top:16px;text-align:center;"><img src="/EducatecLog.jpg" alt="EducaTec" style="height:20px;vertical-align:middle;border-radius:4px;margin-right:4px;">Actividad creada con <a href="#" target="_blank" style="color:#2d3a8c;text-decoration:none;font-weight:600;">EducaTec</a></div>`;
+    }
+
+    function iniciarJuego() {
+      renderApp(crucigramaData);
+      startTimer();
     }
 
     // ── RENDER ────────────────────────────────────────────────────
@@ -216,7 +235,6 @@
 
         <div class="actions">
           <button class="btn btn-primary" onclick="checkCW()">✅ Verificar</button>
-          <button class="btn btn-secondary" onclick="revealCW()">💡 Revelar</button>
           <button class="btn btn-outline" onclick="clearCW()">🗑️ Limpiar</button>
           <button class="btn btn-gray" onclick="reiniciar()">🔄 Reiniciar</button>
         </div>
@@ -243,7 +261,7 @@
         } else {
           const inp = document.createElement("input");
           inp.type = "text"; inp.maxLength = 1; inp.dataset.answer = grid[r][cc];
-          inp.addEventListener("focus", () => startTimer());
+          inp.addEventListener("focus", () => {});
           inp.addEventListener("input", cwInput);
           inp.addEventListener("keydown", cwKeydown);
           cell.appendChild(inp);
