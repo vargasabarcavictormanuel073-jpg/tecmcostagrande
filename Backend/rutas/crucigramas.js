@@ -12,6 +12,9 @@ const auth = [verificarToken, soloUsuario];
 // GET    /api/crucigramas
 router.get("/", auth, ctrl.listar);
 
+// GET  /api/crucigramas/publico/:id  — visor público sin auth (para iframe)
+router.get("/publico/:id", ctrl.obtenerPublico);
+
 // GET    /api/crucigramas/:id
 router.get("/:id", auth, ctrl.obtener);
 

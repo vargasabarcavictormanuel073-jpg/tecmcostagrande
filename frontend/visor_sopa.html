@@ -170,7 +170,7 @@
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       try {
-        const res = await fetch(`${API}/sopas/${id}`, { headers });
+        const res = await fetch(`${API}/sopas/publico/${id}`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         if (!data.exito || !data.datos.grid_data) throw new Error();

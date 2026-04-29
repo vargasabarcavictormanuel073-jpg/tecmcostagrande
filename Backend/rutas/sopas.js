@@ -12,6 +12,9 @@ const auth = [verificarToken, soloUsuario];
 // GET    /api/sopas
 router.get("/", auth, ctrl.listar);
 
+// GET  /api/sopas/publico/:id  — visor público sin auth (para iframe)
+router.get("/publico/:id", ctrl.obtenerPublico);
+
 // GET    /api/sopas/:id
 router.get("/:id", auth, ctrl.obtener);
 

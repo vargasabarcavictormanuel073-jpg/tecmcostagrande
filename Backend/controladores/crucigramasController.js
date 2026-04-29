@@ -18,6 +18,15 @@ async function obtener(req, res) {
   } catch (e) { return error(res, "Error interno", 500); }
 }
 
+// Endpoint público — sin autenticación, para los visores iframe
+async function obtenerPublico(req, res) {
+  try {
+    const c = await Crucigrama.findById(req.params.id);
+    if (!c) return error(res, "Crucigrama no encontrado", 404);
+    return ok(res, c);
+  } catch (e) { return error(res, "Error interno", 500); }
+}
+
 async function crear(req, res) {
   try {
     const usuario_id = req.usuario.id;
@@ -44,4 +53,4 @@ async function eliminar(req, res) {
   } catch (e) { return error(res, "Error interno", 500); }
 }
 
-module.exports = { listar, obtener, crear, eliminar };
+module.exports = { listar, obtener, obtenerPublico, crear, eliminar };
