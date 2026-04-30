@@ -82,6 +82,13 @@
     .msg-carga { text-align:center;padding:60px 20px;color:#888;font-size:1rem; }
     .branding { font-size:0.72rem;color:#bbb;margin-top:16px; }
     .branding a { color:#2d3a8c;text-decoration:none;font-weight:600; }
+
+    /* ── PANTALLA INICIO ── */
+    .start-screen { display:flex;flex-direction:column;align-items:center;gap:16px;background:white;border-radius:20px;padding:40px 32px;box-shadow:0 8px 32px rgba(45,58,140,.12);max-width:420px;width:100%;margin-top:40px;text-align:center; }
+    .start-icon { font-size:4rem; }
+    .start-titulo { font-size:1.4rem;font-weight:800;color:#2d3a8c; }
+    .start-info { font-size:.9rem;color:#6b7280; }
+    .btn-start { background:#2d3a8c;color:white;border:none;border-radius:12px;padding:14px 40px;font-size:1.1rem;font-weight:700;cursor:pointer;margin-top:8px; }
   </style>
 </head>
 <body>
@@ -96,6 +103,7 @@
       letrasAdivinadas: new Set(), errores: 0, maxErrores: 6,
       terminado: false, aciertos: 0,
     };
+    let ahorcadoDatos = null;
 
     // ── CRONÓMETRO ────────────────────────────────────────────────
     let timerSecs = 0, timerInterval = null, timerStarted = false, timerStopped = false;
@@ -136,10 +144,28 @@
         const data = await res.json();
         if (!data.exito) throw new Error();
         state.palabras = data.datos.palabras;
-        renderApp(data.datos);
+        ahorcadoDatos = data.datos;
+        mostrarInicio(data.datos);
       } catch {
         document.getElementById("app").innerHTML='<div class="msg-carga">❌ No se pudo cargar el ahorcado.</div>';
       }
+    }
+
+    // ── PANTALLA DE INICIO ────────────────────────────────────────
+    function mostrarInicio(datos) {
+      document.getElementById("app").innerHTML = `
+        <div class="start-screen">
+          <div class="start-icon">🪢</div>
+          <div class="start-titulo">${datos.titulo}</div>
+          <div class="start-info">${datos.palabras.length} palabras para adivinar</div>
+          <button class="btn-start" onclick="iniciarJuego()">▶ Iniciar actividad</button>
+        </div>
+        <div class="branding"><img src="/EducatecLog.jpg" alt="EducaTec" style="height:20px;vertical-align:middle;border-radius:4px;margin-right:4px;">Actividad creada con <a href="#" target="_blank">EducaTec</a></div>`;
+    }
+
+    function iniciarJuego() {
+      renderApp(ahorcadoDatos);
+      startTimer();
     }
 
     // ── RENDER APP ────────────────────────────────────────────────
@@ -263,7 +289,6 @@
     // ── ADIVINAR ──────────────────────────────────────────────────
     function adivinar(letra) {
       if (state.terminado) return;
-      startTimer();
       state.letrasAdivinadas.add(letra);
 
       if (!state.palabra.includes(letra)) {
